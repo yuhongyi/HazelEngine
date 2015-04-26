@@ -28,5 +28,10 @@
 *.app
 *.user
 *.suo
-HazelEngine.opensdf
+*.opensdf
 *.sdf
+
+# Folders
+/Debug
+/Release
+/ipch
