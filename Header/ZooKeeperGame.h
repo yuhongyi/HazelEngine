@@ -1,6 +1,8 @@
 #pragma once
+#include "Globals.h"
 #include "Grid.h"
 #include "GameObject.h"
+#include "Singleton.h"
 
 class ZooKeeperGame : public Singleton<ZooKeeperGame>, public GameObject, public IInputReceiver
 {

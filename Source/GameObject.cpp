@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "Globals.h"
 #include "GameObject.h"
 
 GameObject::GameObject() :
@@ -12,23 +12,6 @@ GameObject::GameObject(Vector2D size):
 	mId(-1),
 	mPosition(-1.f, -1.f),
 	mSize(size)
-{
-
-}
-bool GameObject::Initialize(LPDIRECT3DDEVICE9 d3dDevice)
-{
-	return true;
-}
-
-void GameObject::Deinitialize()
-{
-}
-
-void GameObject::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
-{
-}
-
-void GameObject::Tick(float deltaTime)
 {
 }
 

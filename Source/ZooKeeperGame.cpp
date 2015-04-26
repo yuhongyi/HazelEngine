@@ -1,6 +1,7 @@
-#include "stdafx.h"
 #include "Time.h"
 #include "ZooKeeperGame.h"
+#include "InputManager.h"
+#include "ParticleManager.h"
 
 ZooKeeperGame::ZooKeeperGame()
 {

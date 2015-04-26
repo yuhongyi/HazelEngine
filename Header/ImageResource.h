@@ -1,4 +1,5 @@
 #pragma once
+#include <d3d9.h>
 #include "GameResource.h"
 
 class ImageResource : public GameResource

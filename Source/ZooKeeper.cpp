@@ -3,179 +3,136 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
-#include "stdafx.h"
 #include "../resource.h"
 #include "ZooKeeperGame.h"
 #include "ResourceManager.h"
 #include "InputManager.h"
-#include "SoundManager.h"
+#include "ParticleManager.h"
+#include <windows.h>
 
 //-----------------------------------------------------------------------------
 // Global variables
 //-----------------------------------------------------------------------------
+LPDIRECT3D9				g_pD3D = NULL; // Used to create the D3DDevice
 LPDIRECT3DDEVICE9       g_pd3dDevice = NULL; // Our rendering device
 
-//--------------------------------------------------------------------------------------
-// Rejects any D3D9 devices that aren't acceptable to the app by returning false
-//--------------------------------------------------------------------------------------
-bool CALLBACK IsD3D9DeviceAcceptable( D3DCAPS9* pCaps, D3DFORMAT AdapterFormat, D3DFORMAT BackBufferFormat,
-                                      bool bWindowed, void* pUserContext )
+
+//-----------------------------------------------------------------------------
+// Name: InitD3D()
+// Desc: Initializes Direct3D
+//-----------------------------------------------------------------------------
+HRESULT InitD3D(HWND hWnd)
 {
-    // Typically want to skip back buffer formats that don't support alpha blending
-    IDirect3D9* pD3D = DXUTGetD3D9Object();
-    if( FAILED( pD3D->CheckDeviceFormat( pCaps->AdapterOrdinal, pCaps->DeviceType,
-                                         AdapterFormat, D3DUSAGE_QUERY_POSTPIXELSHADER_BLENDING,
-                                         D3DRTYPE_TEXTURE, BackBufferFormat ) ) )
-        return false;
+	// Create the D3D object.
+	if (NULL == (g_pD3D = Direct3DCreate9(D3D_SDK_VERSION)))
+		return E_FAIL;
 
-    return true;
-}
+	// Set up the structure used to create the D3DDevice. Since we are now
+	// using more complex geometry, we will create a device with a zbuffer.
+	D3DPRESENT_PARAMETERS d3dpp;
+	ZeroMemory(&d3dpp, sizeof(d3dpp));
+	d3dpp.Windowed = TRUE;
+	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;
+	d3dpp.EnableAutoDepthStencil = TRUE;
+	d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8;
 
+	// Create the D3DDevice
+	if (FAILED(g_pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd,
+		D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+		&d3dpp, &g_pd3dDevice)))
+	{
+		return E_FAIL;
+	}
 
-//--------------------------------------------------------------------------------------
-// Before a device is created, modify the device settings as needed
-//--------------------------------------------------------------------------------------
-bool CALLBACK ModifyDeviceSettings( DXUTDeviceSettings* pDeviceSettings, void* pUserContext )
-{
-    return true;
-}
+	// Turn on the zbuffer
+	g_pd3dDevice->SetRenderState(D3DRS_ZENABLE, TRUE);
 
+	// Turn on ambient lighting 
+	g_pd3dDevice->SetRenderState(D3DRS_AMBIENT, 0xffffffff);
 
-//--------------------------------------------------------------------------------------
-// Create any D3D9 resources that will live through a device reset (D3DPOOL_MANAGED)
-// and aren't tied to the back buffer size
-//--------------------------------------------------------------------------------------
-HRESULT CALLBACK OnD3D9CreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc,
-                                     void* pUserContext )
-{
-	g_pd3dDevice = pd3dDevice;
-
-    return S_OK;
-}
-
-
-//--------------------------------------------------------------------------------------
-// Create any D3D9 resources that won't live through a device reset (D3DPOOL_DEFAULT) 
-// or that are tied to the back buffer size 
-//--------------------------------------------------------------------------------------
-HRESULT CALLBACK OnD3D9ResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc,
-                                    void* pUserContext )
-{
-    return S_OK;
-}
-
-
-//--------------------------------------------------------------------------------------
-// Handle updates to the scene.  This is called regardless of which D3D API is used
-//--------------------------------------------------------------------------------------
-void CALLBACK OnFrameMove( double fTime, float fElapsedTime, void* pUserContext )
-{
-	ParticleManager::GetInstance()->Tick(fElapsedTime);
-	ZooKeeperGame::GetInstance()->Tick(fElapsedTime);
+	return S_OK;
 }
 
 
 //--------------------------------------------------------------------------------------
 // Render the scene using the D3D9 device
 //--------------------------------------------------------------------------------------
-void CALLBACK OnD3D9FrameRender( IDirect3DDevice9* pd3dDevice, double fTime, float fElapsedTime, void* pUserContext )
+void Render(float fElapsedTime)
 {
-    HRESULT hr;
+	HRESULT hr;
 
-    // Clear the render target and the zbuffer 
-    V( pd3dDevice->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_ARGB( 0, 45, 50, 170 ), 1.0f, 0 ) );
+	// Clear the render target and the zbuffer 
+	V(g_pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_ARGB(0, 45, 50, 170), 1.0f, 0));
 
-    // Render the scene
-    if( SUCCEEDED( pd3dDevice->BeginScene() ) )
-    {
-		ShaderResource* shader = dynamic_cast<ShaderResource*>(ResourceManager::GetInstance()->GetResourceById(10));
-		if(shader)
+	// Render the scene
+	if (SUCCEEDED(g_pd3dDevice->BeginScene()))
+	{
+		ShaderResource* shader = dynamic_cast<ShaderResource*>(ResourceManager::GetInstance()->GetResourceById(7));
+		if (shader)
 		{
 			ID3DXEffect* shaderEffect = shader->GetEffect();
-			if(shaderEffect)
+			if (shaderEffect)
 			{
-				ZooKeeperGame::GetInstance()->Render(pd3dDevice, shaderEffect);
+				ZooKeeperGame::GetInstance()->Render(g_pd3dDevice, shaderEffect);
 			}
 		}
-        V( pd3dDevice->EndScene() );
-    }
-}
-
-
-//--------------------------------------------------------------------------------------
-// Handle messages to the application 
-//--------------------------------------------------------------------------------------
-LRESULT CALLBACK MsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam,
-                          bool* pbNoFurtherProcessing, void* pUserContext )
-{
-	switch( uMsg )
-	{
-		case WM_MOUSEMOVE:
-			InputManager::GetInstance()->OnMouseMove(hWnd, LOWORD(lParam), HIWORD(lParam), (int)wParam);
-			break;
-		case WM_LBUTTONDOWN:
-			InputManager::GetInstance()->OnMouseLButtonDown(hWnd, LOWORD(lParam), HIWORD(lParam), (int)wParam);
-			break;
-		case WM_LBUTTONUP:
-			InputManager::GetInstance()->OnMouseLButtonUp(hWnd, LOWORD(lParam), HIWORD(lParam), (int)wParam);
-			break;
+		V(g_pd3dDevice->EndScene());
 	}
 
-    return 0;
+	// Present the backbuffer contents to the display
+	g_pd3dDevice->Present(NULL, NULL, NULL, NULL);
 }
 
 
 //--------------------------------------------------------------------------------------
-// Release D3D9 resources created in the OnD3D9ResetDevice callback 
+// Handle updates to the scene.  This is called regardless of which D3D API is used
 //--------------------------------------------------------------------------------------
-void CALLBACK OnD3D9LostDevice( void* pUserContext )
+void Tick()
 {
+	static float gameTime = GetTickCount() / 1000.f;
+
+	float newGameTime = GetTickCount() / 1000.f;
+	float fElapsedTime = (newGameTime - gameTime);
+	gameTime = newGameTime;
+
+	ParticleManager::GetInstance()->Tick(fElapsedTime);
+	ZooKeeperGame::GetInstance()->Tick(fElapsedTime);
+
+	Render(fElapsedTime);
 }
 
 
-//--------------------------------------------------------------------------------------
-// Release D3D9 resources created in the OnD3D9CreateDevice callback 
-//--------------------------------------------------------------------------------------
-void CALLBACK OnD3D9DestroyDevice( void* pUserContext )
-{
-}
-
-bool InitializeGame()
+HRESULT InitializeGame()
 {
 	// Initialize Resource
 	if(!ResourceManager::GetInstance()->InitResource(g_pd3dDevice))
 	{
-		return false;
-	}
-
-	if(!SoundManager::GetInstance()->InitResource(g_pd3dDevice))
-	{
-		return false;
+		return E_FAIL;
 	}
 	
 	// Initialize game object
 	if(!ParticleManager::GetInstance()->Initialize(g_pd3dDevice))
 	{
-		return false;
+		return E_FAIL;
 	}
 
 	if(!ZooKeeperGame::GetInstance()->Initialize(g_pd3dDevice))
 	{
-		return false;
+		return E_FAIL;
 	}
 
-	return true;
+	return S_OK;
 }
+
 
 void CleanUp()
 {
-	SoundManager::GetInstance()->CleanUpResource();
 	ResourceManager::GetInstance()->CleanUpResource();
 	ParticleManager::GetInstance()->Deinitialize();
 	ZooKeeperGame::GetInstance()->Deinitialize();
 
 	InputManager::GetInstance()->Destroy();
-	SoundManager::GetInstance()->Destroy();
 	ResourceManager::GetInstance()->Destroy();
 	ParticleManager::GetInstance()->Destroy();
 	ZooKeeperGame::GetInstance()->Destroy();
@@ -183,48 +140,81 @@ void CleanUp()
 
 
 //--------------------------------------------------------------------------------------
-// Initialize everything and go into a render loop
+// Handle messages to the application 
 //--------------------------------------------------------------------------------------
-INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, int )
+LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    // Enable run-time memory check for debug builds.
-#if defined(DEBUG) | defined(_DEBUG)
-    _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-#endif
-
-    // Set the callback functions
-    DXUTSetCallbackD3D9DeviceAcceptable( IsD3D9DeviceAcceptable );
-    DXUTSetCallbackD3D9DeviceCreated( OnD3D9CreateDevice );
-    DXUTSetCallbackD3D9DeviceReset( OnD3D9ResetDevice );
-    DXUTSetCallbackD3D9FrameRender( OnD3D9FrameRender );
-    DXUTSetCallbackD3D9DeviceLost( OnD3D9LostDevice );
-    DXUTSetCallbackD3D9DeviceDestroyed( OnD3D9DestroyDevice );
-    DXUTSetCallbackDeviceChanging( ModifyDeviceSettings );
-    DXUTSetCallbackMsgProc( MsgProc );
-    DXUTSetCallbackFrameMove( OnFrameMove );
-
-    // TODO: Perform any application-level initialization here
-
-    // Initialize DXUT and create the desired Win32 window and Direct3D device for the application
-    DXUTInit( true, true ); // Parse the command line and show msgboxes
-    DXUTSetHotkeyHandling( true, true, true );  // handle the default hotkeys
-    DXUTSetCursorSettings( true, true ); // Show the cursor and clip it when in full screen
-    DXUTCreateWindow( L"ZooKeeper" );
-	DXUTCreateDevice( true, gGridWidth * gCellSize, gGridHeight * gCellSize );
-
-	// Initialize D3D resources
-	if(!InitializeGame())
+	switch (uMsg)
 	{
-		return DXUTGetExitCode();
+	case WM_MOUSEMOVE:
+		InputManager::GetInstance()->OnMouseMove(hWnd, LOWORD(lParam), HIWORD(lParam), (int)wParam);
+		break;
+	case WM_LBUTTONDOWN:
+		InputManager::GetInstance()->OnMouseLButtonDown(hWnd, LOWORD(lParam), HIWORD(lParam), (int)wParam);
+		break;
+	case WM_LBUTTONUP:
+		InputManager::GetInstance()->OnMouseLButtonUp(hWnd, LOWORD(lParam), HIWORD(lParam), (int)wParam);
+		break;
+	case WM_DESTROY:
+		CleanUp();
+		PostQuitMessage(0);
+		return 0;
 	}
 
-    // Start the render loop
-    DXUTMainLoop();
-	
-	// Clean up 
-	CleanUp();
+	return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
 
-    // TODO: Perform any application-level cleanup here
 
-    return DXUTGetExitCode();
+//-----------------------------------------------------------------------------
+// Name: WinMain()
+// Desc: The application's entry point
+//-----------------------------------------------------------------------------
+INT WINAPI wWinMain(HINSTANCE hInst, HINSTANCE, LPWSTR, INT)
+{
+	UNREFERENCED_PARAMETER(hInst);
+
+	// Register the window class
+	WNDCLASSEX wc =
+	{
+		sizeof(WNDCLASSEX), CS_CLASSDC, MsgProc, 0L, 0L,
+		GetModuleHandle(NULL), NULL, NULL, NULL, NULL,
+		L"D3D Tutorial", NULL
+	};
+	RegisterClassEx(&wc);
+
+	// Create the application's window
+	HWND hWnd = CreateWindow(L"D3D Tutorial", L"D3D Tutorial 06: Meshes",
+		WS_OVERLAPPEDWINDOW, 100, 100, gGridWidth * gCellSize, gGridHeight * gCellSize,
+		NULL, NULL, wc.hInstance, NULL);
+
+	// Initialize Direct3D
+	if (SUCCEEDED(InitD3D(hWnd)))
+	{
+		// Create the scene geometry
+		if (SUCCEEDED(InitializeGame()))
+		{
+			// Show the window
+			ShowWindow(hWnd, SW_SHOWDEFAULT);
+			UpdateWindow(hWnd);
+
+			// Enter the message loop
+			MSG msg;
+			ZeroMemory(&msg, sizeof(msg));
+			while (msg.message != WM_QUIT)
+			{
+				if (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
+				{
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
+				}
+				else
+				{
+					Tick();
+				}
+			}
+		}
+	}
+
+	UnregisterClass(L"D3D Tutorial", wc.hInstance);
+	return 0;
 }

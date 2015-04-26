@@ -1,5 +1,4 @@
-#include "stdafx.h"
-
+#include "InputManager.h"
 InputManager::InputManager() :
 	mIsMouseLeftButtonDown(false),
 	mMousePosition(0.f, 0.f)

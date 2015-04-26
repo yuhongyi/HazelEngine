@@ -1,8 +1,11 @@
-#include "stdafx.h"
-#include "map"
+#include <map>
 
+#include "Globals.h"
 #include "Grid.h"
 #include "GridSimulator.h"
+#include "ResourceManager.h"
+#include "InputManager.h"
+#include "ParticleManager.h"
 
 using namespace std;
 
@@ -35,6 +38,24 @@ void Grid::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 	HRESULT hr;
 	UINT iPass, cPasses;
 
+	// Set WVP matrix
+	D3DXMATRIX matWorld, matScale, matTrans, matProj, matWVP;
+
+	D3DXMatrixScaling(&matScale, 1.0f, -1.0f, 1.0f);
+	D3DXMatrixTranslation(&matTrans, -0.5f, mHeight * gCellSize + 0.5f, 0.0f);
+	D3DXMatrixMultiply(&matWorld, &matScale, &matTrans);
+
+	D3DXMatrixOrthoOffCenterLH(
+		&matProj,
+		0.0f, (float)mWidth * gCellSize,
+		0.0f, (float)mHeight * gCellSize,
+		0.0f, 1.0f);
+
+	D3DXMatrixMultiply(&matWVP, &matWorld, &matProj);
+
+	D3DXHANDLE wvpMatrixHandle = effect->GetParameterByName(NULL, "gWorldViewProjectionMatrix");
+	effect->SetMatrix(wvpMatrixHandle, &matWVP);
+
 	D3DXHANDLE techniqueHandle = effect->GetTechniqueByName("RenderSceneWithTexture");
 	effect->SetTechnique(techniqueHandle);
 
@@ -42,24 +63,6 @@ void Grid::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 	for(iPass = 0; iPass < cPasses; iPass++)
 	{
 		V(effect->BeginPass(iPass));
-
-		// Set WVP matrix
-		D3DXMATRIX matWorld, matScale, matTrans, matProj, matWVP;
-
-		D3DXMatrixScaling(&matScale, 1.0f, -1.0f, 1.0f);
-		D3DXMatrixTranslation(&matTrans, -0.5f, mHeight * gCellSize + 0.5f, 0.0f);
-		D3DXMatrixMultiply(&matWorld, &matScale, &matTrans);
-
-		D3DXMatrixOrthoOffCenterLH(
-			&matProj,
-			0.0f, (float) mWidth * gCellSize,
-			0.0f, (float) mHeight * gCellSize,
-			0.0f, 1.0f);
-
-		D3DXMatrixMultiply(&matWVP, &matWorld, &matProj);
-
-		D3DXHANDLE wvpMatrixHandle = effect->GetParameterByName(NULL, "gWorldViewProjectionMatrix");
-		effect->SetMatrix(wvpMatrixHandle, &matWVP);
 
 		// Render
 		for(int i = 0; i < mWidth * mHeight; i++)
@@ -243,11 +246,7 @@ void Grid::Tick(float deltaTime)
 	}
 
 	// Process vanished cells
-	if(ProcessVanishedCells())
-	{
-		// Play sound
-		SoundManager::GetInstance()->PlaySoundEffect(8, false);
-	}
+	ProcessVanishedCells();
 
 	// Tick cells
 	for(int i = 0; i < mWidth * mHeight; i++)
@@ -347,7 +346,6 @@ bool Grid::HasAnyMovement()
 	if(!gridSim.FindAvailableMove(cell1, cell2))
 	{
 		VanishAllCells();
-		SoundManager::GetInstance()->PlaySoundEffect(9, false);
 
 		return false;
 	}

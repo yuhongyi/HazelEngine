@@ -1,11 +1,10 @@
-#include "stdafx.h"
 #include "ParticleManager.h"
+#include "ResourceManager.h"
+#include "GameResource.h"
+#include "ImageResource.h"
 
-#include "DXUT.h"
-#include "DXUTcamera.h"
-#include "DXUTgui.h"
-#include "DXUTsettingsdlg.h"
-#include "SDKmisc.h"
+#include <vector>
+
 // class Particle
 Particle::Particle() :
 	mIsActive(false),
@@ -72,7 +71,7 @@ void Particle::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 
 void Particle::Tick(float deltaTime)
 {
-	mParticleTime = (float)clock() / 1000.f - mStartTime;
+	mParticleTime += deltaTime;
 	mParticleFadeFactor = max(min(float(1.0 - (mParticleTime / mLifeTime)), 1.f), 0.f);
 }
 
@@ -125,7 +124,7 @@ bool Particle::Play(Cell* cellTemplate, float lifetime)
 
 	SetCellTemplate(cellTemplate);
 	mLifeTime = lifetime;
-	mStartTime = (float)clock() / 1000.f;
+	mStartTime = 0.f;
 	mIsActive = true;
 
 	return true;
@@ -201,6 +200,24 @@ void ParticleManager::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 	HRESULT hr;
 	UINT iPass, cPasses;
 
+	// Set WVP matrix
+	D3DXMATRIX matWorld, matScale, matTrans, matProj, matWVP;
+
+	D3DXMatrixScaling(&matScale, 1.0f, -1.0f, 1.0f);
+	D3DXMatrixTranslation(&matTrans, -0.5f, gGridHeight * gCellSize + 0.5f, 0.0f);
+	D3DXMatrixMultiply(&matWorld, &matScale, &matTrans);
+
+	D3DXMatrixOrthoOffCenterLH(
+		&matProj,
+		0.0f, (float)gGridWidth * gCellSize,
+		0.0f, (float)gGridHeight * gCellSize,
+		0.0f, 1.0f);
+
+	D3DXMatrixMultiply(&matWVP, &matWorld, &matProj);
+
+	D3DXHANDLE wvpMatrixHandle = effect->GetParameterByName(NULL, "gWorldViewProjectionMatrix");
+	effect->SetMatrix(wvpMatrixHandle, &matWVP);
+
 	D3DXHANDLE techniqueHandle = effect->GetTechniqueByName("RenderParticle");
 	effect->SetTechnique(techniqueHandle);
 
@@ -208,24 +225,6 @@ void ParticleManager::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 	for(iPass = 0; iPass < cPasses; iPass++)
 	{
 		V(effect->BeginPass(iPass));
-
-		// Set WVP matrix
-		D3DXMATRIX matWorld, matScale, matTrans, matProj, matWVP;
-
-		D3DXMatrixScaling(&matScale, 1.0f, -1.0f, 1.0f);
-		D3DXMatrixTranslation(&matTrans, -0.5f, gGridHeight * gCellSize + 0.5f, 0.0f);
-		D3DXMatrixMultiply(&matWorld, &matScale, &matTrans);
-
-		D3DXMatrixOrthoOffCenterLH(
-			&matProj,
-			0.0f, (float) gGridWidth * gCellSize,
-			0.0f, (float) gGridHeight * gCellSize,
-			0.0f, 1.0f);
-
-		D3DXMatrixMultiply(&matWVP, &matWorld, &matProj);
-
-		D3DXHANDLE wvpMatrixHandle = effect->GetParameterByName(NULL, "gWorldViewProjectionMatrix");
-		effect->SetMatrix(wvpMatrixHandle, &matWVP);
 
 		for(auto particleIter = mActiveParticles.begin();
 			particleIter != mActiveParticles.end();
@@ -292,7 +291,7 @@ void ParticleManager::ReturnParticleToPool(Particle* particleToReturn)
 void ParticleManager::StopAllParticles()
 {
 	// Check life time of active particles
-	vector<Particle*> particlesToStop;
+	std::vector<Particle*> particlesToStop;
 
 	for(auto particleIter = mActiveParticles.cbegin();
 		particleIter != mActiveParticles.cend();

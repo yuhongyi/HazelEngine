@@ -1,6 +1,7 @@
-#include "stdafx.h"
+#include "Globals.h"
 #include "Cell.h"
 #include "ImageResource.h"
+#include "ResourceManager.h"
 
 Cell::Cell():
 	mResourceId(-1),
@@ -220,7 +221,7 @@ void Cell::TickFalling(float deltaTime)
 	if(mCellBelow)
 	{
 		float maxPositionY = mCellBelow->GetPosition().Y - mSize.Y;
-		mPosition.Y = min<float>(mPosition.Y, maxPositionY);
+		mPosition.Y = min(mPosition.Y, maxPositionY);
 	}
 
 	// Check if landed

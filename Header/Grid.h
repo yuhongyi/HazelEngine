@@ -1,6 +1,7 @@
 #pragma once
 #include "Cell.h"
 #include "GameObject.h"
+#include "Interfaces.h"
 
 class Grid : public GameObject, public IInputReceiver
 {

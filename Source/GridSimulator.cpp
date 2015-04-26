@@ -1,5 +1,6 @@
-#include "stdafx.h"
+#include "Globals.h"
 #include "GridSimulator.h"
+#include "GameConfig.h"
 
 GridSimulator::GridSimulator() :
 	mSimGrid(NULL),

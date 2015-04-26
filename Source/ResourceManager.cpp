@@ -1,4 +1,5 @@
-#include "stdafx.h"
+#include "ResourceManager.h"
+#include "GameConfig.h"
 
 ResourceManager::ResourceManager() :
 mImageResourceCount(0)
@@ -26,18 +27,7 @@ bool ResourceManager::InitResource(LPDIRECT3DDEVICE9 d3dDevice)
 		}
 		mResources.insert(pair<int, GameResource*>(resource_index++, (GameResource*)image));
 	}
-	
-	for(int i = 0; i < gSoundCount; i++)
-	{
-		SoundResource* sound = new SoundResource();
-		sound->SetPath(gSoundList[i]);
-		if(!sound->InitResource(d3dDevice))
-		{
-			return false;
-		}
-		mResources.insert(pair<int, GameResource*>(resource_index++, (GameResource*)sound));
-	}
-	
+		
 	for(int i = 0; i < gShaderCount; i++)
 	{
 		ShaderResource* shader = new ShaderResource();

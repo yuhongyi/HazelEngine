@@ -1,8 +1,8 @@
 #pragma once
 #include <map>
 using namespace std;
+#include "Singleton.h"
 #include "ImageResource.h"
-#include "SoundResource.h"
 #include "ShaderResource.h"
 
 class ResourceManager : public Singleton<ResourceManager>, public GameResource

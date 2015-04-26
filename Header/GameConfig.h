@@ -1,4 +1,5 @@
 #pragma once
+#include <windows.h>
 
 // Hard coded for now.
 // This file will be replaced by a config class to load config file
@@ -32,14 +33,7 @@ static LPWSTR gImageList[gImageCount] =
 	L"Resources\\Images\\Cat.png",
 };
 
-static const int gSoundCount = 3;
-static LPWSTR gSoundList[gSoundCount] = 
-{
-	L"Resources\\Sound\\MusicMono.wav",
-	L"Resources\\Sound\\0085.WAV",
-	L"Resources\\Sound\\0001.WAV",
-};
-
+// Shader list
 static const int gShaderCount = 1;
 static LPWSTR gShaderList[gShaderCount] =
 {

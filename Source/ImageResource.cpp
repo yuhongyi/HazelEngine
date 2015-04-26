@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "Globals.h"
 #include "ImageResource.h"
 #pragma warning(disable:4995)
 #pragma warning(disable:4996)
@@ -11,6 +11,7 @@ ImageResource::ImageResource() :
 
 bool ImageResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice)
 {
+	assert(d3dDevice);
 	return true;
 }
 

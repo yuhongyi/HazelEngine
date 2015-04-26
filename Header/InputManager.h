@@ -2,6 +2,9 @@
 #include <vector>
 using namespace std;
 
+#include "Globals.h"
+#include "Singleton.h"
+#include "Interfaces.h"
 
 class InputManager : public Singleton<InputManager>, public IInputReceiver
 {

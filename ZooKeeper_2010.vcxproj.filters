@@ -5,9 +5,6 @@
       <UniqueIdentifier>{8e114980-c1a3-4ada-ad7c-83caadf5daeb}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
-    <Filter Include="DXUT">
-      <UniqueIdentifier>{a43c5c25-0e86-4a20-b64a-883785ff74fd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{2c3d4c8c-5d1a-459a-a05a-a4e4b608a44e}</UniqueIdentifier>
       <Extensions>fx;fxh;hlsl</Extensions>
@@ -32,63 +29,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="DXUT\Optional\directx.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <ClInclude Include="DXUT\Core\DXUT.h">
-      <Filter>DXUT</Filter>
-    </ClInclude>
-    <ClInclude Include="DXUT\Core\DXUTenum.h">
-      <Filter>DXUT</Filter>
-    </ClInclude>
-    <ClInclude Include="DXUT\Core\DXUTmisc.h">
-      <Filter>DXUT</Filter>
-    </ClInclude>
-    <ClCompile Include="DXUT\Core\DXUT.cpp">
-      <Filter>DXUT</Filter>
-    </ClCompile>
-    <ClCompile Include="DXUT\Core\DXUTenum.cpp">
-      <Filter>DXUT</Filter>
-    </ClCompile>
-    <ClCompile Include="DXUT\Core\DXUTmisc.cpp">
-      <Filter>DXUT</Filter>
-    </ClCompile>
-    <ClInclude Include="DXUT\Optional\DXUTcamera.h">
-      <Filter>DXUT</Filter>
-    </ClInclude>
-    <ClInclude Include="DXUT\Optional\DXUTgui.h">
-      <Filter>DXUT</Filter>
-    </ClInclude>
-    <ClInclude Include="DXUT\Optional\DXUTres.h">
-      <Filter>DXUT</Filter>
-    </ClInclude>
-    <ClInclude Include="DXUT\Optional\DXUTsettingsdlg.h">
-      <Filter>DXUT</Filter>
-    </ClInclude>
-    <ClInclude Include="DXUT\Optional\SDKmesh.h">
-      <Filter>DXUT</Filter>
-    </ClInclude>
-    <ClInclude Include="DXUT\Optional\SDKmisc.h">
-      <Filter>DXUT</Filter>
-    </ClInclude>
-    <ClCompile Include="DXUT\Optional\DXUTcamera.cpp">
-      <Filter>DXUT</Filter>
-    </ClCompile>
-    <ClCompile Include="DXUT\Optional\DXUTgui.cpp">
-      <Filter>DXUT</Filter>
-    </ClCompile>
-    <ClCompile Include="DXUT\Optional\DXUTres.cpp">
-      <Filter>DXUT</Filter>
-    </ClCompile>
-    <ClCompile Include="DXUT\Optional\DXUTsettingsdlg.cpp">
-      <Filter>DXUT</Filter>
-    </ClCompile>
-    <ClCompile Include="DXUT\Optional\SDKmesh.cpp">
-      <Filter>DXUT</Filter>
-    </ClCompile>
-    <ClCompile Include="DXUT\Optional\SDKmisc.cpp">
-      <Filter>DXUT</Filter>
-    </ClCompile>
     <None Include="Resources\Images\PurpGuy.png">
       <Filter>Resources\Images</Filter>
     </None>
@@ -114,6 +54,12 @@
       <Filter>Resources\Sound</Filter>
     </None>
     <None Include="Shaders\BasicHLSL.fx">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\BaseMaterial.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\ParticleMaterial.shader">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
@@ -142,19 +88,7 @@
     <ClCompile Include="Source\ImageResource.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\SoundManager.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="DXUT\Optional\SDKwavefile.cpp">
-      <Filter>DXUT</Filter>
-    </ClCompile>
-    <ClCompile Include="DXUT\Optional\SDKsound.cpp">
-      <Filter>DXUT</Filter>
-    </ClCompile>
     <ClCompile Include="Source\GridSimulator.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\SoundResource.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\ShaderResource.cpp">
@@ -192,9 +126,6 @@
     <ClInclude Include="Math\GameMath.h">
       <Filter>Math</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header</Filter>
-    </ClInclude>
     <ClInclude Include="Header\Interfaces.h">
       <Filter>Header</Filter>
     </ClInclude>
@@ -207,19 +138,7 @@
     <ClInclude Include="Header\Singleton.h">
       <Filter>Header</Filter>
     </ClInclude>
-    <ClInclude Include="Header\SoundManager.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="DXUT\Optional\SDKwavefile.h">
-      <Filter>DXUT</Filter>
-    </ClInclude>
-    <ClInclude Include="DXUT\Optional\SDKsound.h">
-      <Filter>DXUT</Filter>
-    </ClInclude>
     <ClInclude Include="Header\GridSimulator.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Header\SoundResource.h">
       <Filter>Header</Filter>
     </ClInclude>
     <ClInclude Include="Header\ShaderResource.h">
@@ -235,6 +154,9 @@
       <Filter>Header</Filter>
     </ClInclude>
     <ClInclude Include="Header\GameConfig.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Globals.h">
       <Filter>Header</Filter>
     </ClInclude>
   </ItemGroup>

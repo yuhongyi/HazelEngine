@@ -2,8 +2,8 @@
 #include <list>
 using namespace std; 
 #include "GameObject.h"
+#include "Singleton.h"
 #include "Cell.h"
-#include "time.h"
 
 class Particle : public GameObject
 {
