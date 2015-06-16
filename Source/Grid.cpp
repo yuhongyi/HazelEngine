@@ -420,8 +420,8 @@ bool Grid::CheckVanishWithCell(Cell* cell)
 	int cellCol = cell->GetColumn();
 
 	// Check match in row
-	int colMin = max(0, cellCol - 2);
-	int colMax = min(mWidth - gMinimumVanishCount, cellCol);
+	int colMin = max<int>(0, cellCol - 2);
+	int colMax = min<int>(mWidth - gMinimumVanishCount, cellCol);
 	for(int col = colMin; col <= colMax; col++)
 	{
 		if(CheckVanishFromCell(GetCell(cellRow, col), true))
@@ -431,8 +431,8 @@ bool Grid::CheckVanishWithCell(Cell* cell)
 	}
 
 	// Check match in column
-	int rowMin = max(0, cellRow - 2);
-	int rowMax = min(mHeight - gMinimumVanishCount, cellRow);
+	int rowMin = max<int>(0, cellRow - 2);
+	int rowMax = min<int>(mHeight - gMinimumVanishCount, cellRow);
 	for(int row = rowMin; row <= rowMax; row++)
 	{
 		if(CheckVanishFromCell(GetCell(row, cellCol), false))

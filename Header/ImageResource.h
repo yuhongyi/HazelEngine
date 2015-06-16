@@ -9,13 +9,12 @@ public:
 	ImageResource();
 
 	// GameResource
-	virtual bool InitResource(LPDIRECT3DDEVICE9 d3dDevice);
-	virtual void CleanUpResource();
+	virtual bool InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating = false);
+	virtual void ReleaseResource(bool isDeviceLost = false);
 	
 	// Methods
-	void SetSource(LPDIRECT3DDEVICE9 d3dDevice, LPWSTR source);
+	void LoadResource(LPDIRECT3DDEVICE9 d3dDevice, LPWSTR source);
 	inline LPDIRECT3DTEXTURE9 GetTexture() {return mTexture;}
 private:
-	TCHAR mFileSource[MAX_PATH + 1];
 	LPDIRECT3DTEXTURE9 mTexture;
 };

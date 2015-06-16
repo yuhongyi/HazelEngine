@@ -13,8 +13,8 @@ public:
 	~ResourceManager();
 	
 	// GameResource
-	virtual bool InitResource(LPDIRECT3DDEVICE9 d3dDevice);
-	virtual void CleanUpResource();
+	virtual bool InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating = false);
+	virtual void ReleaseResource(bool isDeviceLost = false);
 
 	// Methods
 	void SetImageResourceCount(int imageResourceCount)

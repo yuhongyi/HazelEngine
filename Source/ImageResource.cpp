@@ -9,18 +9,21 @@ ImageResource::ImageResource() :
 	mFileSource[0] = '/0';
 }
 
-bool ImageResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice)
+bool ImageResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating)
 {
-	assert(d3dDevice);
+	if (FAILED(D3DXCreateTextureFromFileEx(d3dDevice, mFileSource, D3DX_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT, 0, D3DFMT_UNKNOWN, D3DPOOL_DEFAULT, D3DX_FILTER_LINEAR, D3DX_FILTER_LINEAR, 0, NULL, NULL, &mTexture)))
+	{
+		wprintf(L"Failed to load texture %s", mFileSource);
+	}
 	return true;
 }
 
-void ImageResource::CleanUpResource()
+void ImageResource::ReleaseResource(bool isDeviceLost)
 {
 	SAFE_RELEASE(mTexture);
 }
 
-void ImageResource::SetSource(LPDIRECT3DDEVICE9 d3dDevice, LPWSTR source)
+void ImageResource::LoadResource(LPDIRECT3DDEVICE9 d3dDevice, LPWSTR source)
 {
 	if(wcslen(source) < MAX_PATH)
 	{
@@ -31,10 +34,5 @@ void ImageResource::SetSource(LPDIRECT3DDEVICE9 d3dDevice, LPWSTR source)
 	if(wcslen(mFileSource) == 0)
 	{
 		return;
-	}
-
-	if(FAILED(D3DXCreateTextureFromFile(d3dDevice, mFileSource, &mTexture)))
-	{
-		wprintf(L"Failed to load texture %s", mFileSource);
 	}
 }

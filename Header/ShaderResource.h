@@ -9,13 +9,12 @@ public:
 	ShaderResource();
 
 	// GameResource
-	virtual bool InitResource(LPDIRECT3DDEVICE9 d3dDevice);
-	virtual void CleanUpResource();
+	virtual bool InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating = false);
+	virtual void ReleaseResource(bool isDeviceLost = false);
 
 	// Methods
 	void SetSource(LPDIRECT3DDEVICE9 d3dDevice, LPWSTR source);
 	ID3DXEffect* GetEffect();
 private:
-	TCHAR mFileSource[MAX_PATH + 1];
 	ID3DXEffect* mEffect;
 };

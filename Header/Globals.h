@@ -1,12 +1,14 @@
 #pragma once
 #pragma warning(disable:4100)
 #include <d3d9.h>
+#include <dxerr.h>
 #include <D3DX9Effect.h>
 #include <Windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <memory>
+#include <algorithm>
 
 #include "GameConfig.h"
 #include "GameMath.h"

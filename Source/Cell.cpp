@@ -221,7 +221,7 @@ void Cell::TickFalling(float deltaTime)
 	if(mCellBelow)
 	{
 		float maxPositionY = mCellBelow->GetPosition().Y - mSize.Y;
-		mPosition.Y = min(mPosition.Y, maxPositionY);
+		mPosition.Y = min<float>(mPosition.Y, maxPositionY);
 	}
 
 	// Check if landed

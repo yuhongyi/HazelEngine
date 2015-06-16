@@ -15,6 +15,7 @@
 //-----------------------------------------------------------------------------
 LPDIRECT3D9				g_pD3D = NULL; // Used to create the D3DDevice
 LPDIRECT3DDEVICE9       g_pd3dDevice = NULL; // Our rendering device
+int						g_IsDeviceLost = false;
 
 
 //-----------------------------------------------------------------------------
@@ -81,7 +82,12 @@ void Render(float fElapsedTime)
 	}
 
 	// Present the backbuffer contents to the display
-	g_pd3dDevice->Present(NULL, NULL, NULL, NULL);
+	hr = g_pd3dDevice->Present(NULL, NULL, NULL, NULL);
+
+	if (hr == D3DERR_DEVICELOST)
+	{
+		g_IsDeviceLost = true;
+	}
 }
 
 
@@ -128,7 +134,6 @@ HRESULT InitializeGame()
 
 void CleanUp()
 {
-	ResourceManager::GetInstance()->CleanUpResource();
 	ParticleManager::GetInstance()->Deinitialize();
 	ZooKeeperGame::GetInstance()->Deinitialize();
 
@@ -136,6 +141,37 @@ void CleanUp()
 	ResourceManager::GetInstance()->Destroy();
 	ParticleManager::GetInstance()->Destroy();
 	ZooKeeperGame::GetInstance()->Destroy();
+}
+
+void OnDeviceLost()
+{
+	HRESULT hr;
+	assert(g_IsDeviceLost);
+
+	ResourceManager::GetInstance()->ReleaseResource();
+
+	while (g_pd3dDevice->TestCooperativeLevel() != D3DERR_DEVICENOTRESET);
+
+	D3DPRESENT_PARAMETERS d3dpp;
+	ZeroMemory(&d3dpp, sizeof(d3dpp));
+	d3dpp.Windowed = TRUE;
+	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;
+	d3dpp.EnableAutoDepthStencil = TRUE;
+	d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8;
+
+	hr = g_pd3dDevice->Reset(&d3dpp);
+	WCHAR sdd[1000];
+	if (hr != S_OK)
+	{
+		wsprintf(sdd, L"Error: %s error description: %s\n",
+			DXGetErrorString(hr),
+			DXGetErrorDescription(hr));
+	}
+	assert(hr == S_OK);
+	g_IsDeviceLost = false;
+
+	ResourceManager::GetInstance()->InitResource(g_pd3dDevice, true);
 }
 
 
@@ -183,7 +219,7 @@ INT WINAPI wWinMain(HINSTANCE hInst, HINSTANCE, LPWSTR, INT)
 	RegisterClassEx(&wc);
 
 	// Create the application's window
-	HWND hWnd = CreateWindow(L"D3D Tutorial", L"D3D Tutorial 06: Meshes",
+	HWND hWnd = CreateWindow(L"D3D Tutorial", L"Hazel Engine",
 		WS_OVERLAPPEDWINDOW, 100, 100, gGridWidth * gCellSize, gGridHeight * gCellSize,
 		NULL, NULL, wc.hInstance, NULL);
 
@@ -209,6 +245,12 @@ INT WINAPI wWinMain(HINSTANCE hInst, HINSTANCE, LPWSTR, INT)
 				}
 				else
 				{
+					if (g_IsDeviceLost)
+					{
+						OnDeviceLost();
+					}
+
+					assert(!g_IsDeviceLost);
 					Tick();
 				}
 			}

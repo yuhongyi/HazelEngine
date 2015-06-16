@@ -11,16 +11,16 @@ ResourceManager::~ResourceManager()
 	;
 }
 
-bool ResourceManager::InitResource(LPDIRECT3DDEVICE9 d3dDevice)
+bool ResourceManager::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating)
 {
 	int resource_index = 0;
-
+	mResources.clear();
 
 	mImageResourceCount = gImageCount;
 	for(int i = 0; i < gImageCount; i++)
 	{
 		ImageResource* image = new ImageResource();
-		image->SetSource(d3dDevice, gImageList[i]);
+		image->LoadResource(d3dDevice, gImageList[i]);
 		if(!image->InitResource(d3dDevice))
 		{
 			return false;
@@ -32,7 +32,7 @@ bool ResourceManager::InitResource(LPDIRECT3DDEVICE9 d3dDevice)
 	{
 		ShaderResource* shader = new ShaderResource();
 		shader->SetSource(d3dDevice, gShaderList[i]);
-		if(!shader->InitResource(d3dDevice))
+		if(!shader->InitResource(d3dDevice, isRecreating))
 		{
 			return false;
 		}
@@ -42,13 +42,13 @@ bool ResourceManager::InitResource(LPDIRECT3DDEVICE9 d3dDevice)
 	return true;
 }
 
-void ResourceManager::CleanUpResource()
+void ResourceManager::ReleaseResource(bool isDeviceLost)
 {
 	for(auto imageIter = mResources.cbegin();
 		imageIter != mResources.cend();
 		++imageIter)
 	{
-		imageIter->second->CleanUpResource();
+		imageIter->second->ReleaseResource(isDeviceLost);
 		delete imageIter->second;
 	}
 

@@ -72,7 +72,7 @@ void Particle::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 void Particle::Tick(float deltaTime)
 {
 	mParticleTime += deltaTime;
-	mParticleFadeFactor = max(min(float(1.0 - (mParticleTime / mLifeTime)), 1.f), 0.f);
+	mParticleFadeFactor = max<float>(min<float>(float(1.0 - (mParticleTime / mLifeTime)), 1.f), 0.f);
 }
 
 void Particle::UpdateVertexBuffer()
