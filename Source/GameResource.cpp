@@ -1,5 +1,6 @@
 #include "Globals.h"
 #include "GameResource.h"
+#include "ResourceManager.h"
 
 GameResource::GameResource() :
 mResourceId(-1)
@@ -9,6 +10,7 @@ mResourceId(-1)
 
 bool GameResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating)
 {
+	ResourceManager::GetInstance()->AddResource(this);
 	return true;
 }
 

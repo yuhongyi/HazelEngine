@@ -13,7 +13,7 @@ ResourceManager::~ResourceManager()
 
 bool ResourceManager::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating)
 {
-	int resource_index = 0;
+	mNumResource = 0;
 	mResources.clear();
 
 	mImageResourceCount = gImageCount;
@@ -25,7 +25,6 @@ bool ResourceManager::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreatin
 		{
 			return false;
 		}
-		mResources.insert(pair<int, GameResource*>(resource_index++, (GameResource*)image));
 	}
 		
 	for(int i = 0; i < gShaderCount; i++)
@@ -36,7 +35,6 @@ bool ResourceManager::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreatin
 		{
 			return false;
 		}
-		mResources.insert(pair<int, GameResource*>(resource_index++, (GameResource*)shader));
 	}
 
 	return true;

@@ -400,15 +400,18 @@
     <ClCompile Include="Source\GameResource.cpp" />
     <ClCompile Include="Source\GridSimulator.cpp" />
     <ClCompile Include="Source\ImageResource.cpp" />
+    <ClCompile Include="Source\IndexBufferResource.cpp" />
     <ClCompile Include="Source\ParticleManager.cpp" />
     <ClCompile Include="Source\ResourceManager.cpp" />
     <ClCompile Include="Source\ShaderResource.cpp" />
+    <ClCompile Include="Source\VertexBufferResource.cpp" />
     <ClCompile Include="Source\ZooKeeperGame.cpp" />
     <ClInclude Include="Header\GameObject.h" />
     <ClInclude Include="Header\GameResource.h" />
     <ClInclude Include="Header\Globals.h" />
     <ClInclude Include="Header\GridSimulator.h" />
     <ClInclude Include="Header\ImageResource.h" />
+    <ClInclude Include="Header\IndexBufferResource.h" />
     <ClInclude Include="Header\Interfaces.h" />
     <ClInclude Include="Header\ParticleManager.h" />
     <ClInclude Include="Header\ResourceManager.h" />
@@ -439,6 +442,7 @@
     <ClInclude Include="Header\GameConfig.h" />
     <ClInclude Include="Header\Grid.h" />
     <ClInclude Include="Header\InputManager.h" />
+    <ClInclude Include="Header\VertexBufferResource.h" />
     <ClInclude Include="Header\ZooKeeperGame.h" />
     <ClInclude Include="Math\GameMath.h" />
     <CLInclude Include="resource.h" />

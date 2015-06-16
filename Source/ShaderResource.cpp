@@ -13,7 +13,7 @@ bool ShaderResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating
 {
 	if (!isRecreating)
 	{
-		D3DXCreateEffectFromFile(
+		if (FAILED(D3DXCreateEffectFromFile(
 			d3dDevice,
 			mFileSource,
 			NULL,
@@ -21,10 +21,13 @@ bool ShaderResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating
 			D3DXFX_NOT_CLONEABLE | D3DXSHADER_NO_PRESHADER | D3DXFX_LARGEADDRESSAWARE,
 			NULL,
 			&mEffect,
-			NULL);
+			NULL)))
+		{
+			return false;
+		}
 	}
 
-	return true;
+	return GameResource::InitResource(d3dDevice, isRecreating);
 }
 
 void ShaderResource::ReleaseResource(bool isDeviceLost)

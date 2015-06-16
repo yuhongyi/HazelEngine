@@ -28,7 +28,14 @@ public:
 	}
 
 	GameResource* GetResourceById(int id);
+
+	void AddResource(GameResource* resource)
+	{
+		mResources[mNumResource++] = resource;
+	}
+
 private:
 	map<int, GameResource*> mResources;
 	int mImageResourceCount;
+	int mNumResource;
 };

@@ -103,6 +103,12 @@
     <ClCompile Include="Source\ParticleManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\VertexBufferResource.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\IndexBufferResource.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CLInclude Include="resource.h">
@@ -157,6 +163,12 @@
       <Filter>Header</Filter>
     </ClInclude>
     <ClInclude Include="Header\Globals.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\VertexBufferResource.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\IndexBufferResource.h">
       <Filter>Header</Filter>
     </ClInclude>
   </ItemGroup>
