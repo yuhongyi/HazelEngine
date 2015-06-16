@@ -5,7 +5,6 @@
 
 Cell::Cell():
 	mResourceId(-1),
-	mVB(NULL),
 	mPrevCellState(CS_Idle),
 	mCellState(CS_Idle),
 	mFallingSpeed(0.f),
@@ -17,22 +16,14 @@ Cell::Cell():
 
 bool Cell::Initialize(LPDIRECT3DDEVICE9 d3dDevice)
 {
-    if( FAILED( d3dDevice->CreateVertexBuffer( 4 * sizeof( CUSTOMVERTEX ),
-                                                  0, D3DFVF_CUSTOMVERTEX,
-                                                  D3DPOOL_DEFAULT, &mVB, NULL ) ) )
-    {
-        return false;
-    }
+	mVBResource.SetVertexBufferFormat(sizeof(CUSTOMVERTEX), 4, D3DFVF_CUSTOMVERTEX);
+	mVBResource.InitResource(d3dDevice);
 
 	return true;
 }
 
 void Cell::Deinitialize()
 {
-	if(mVB)
-	{
-		mVB->Release();
-	}
 }
 
 void Cell::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
@@ -47,8 +38,8 @@ void Cell::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 	}
 
 	// Set VB
-	d3dDevice->SetStreamSource(0, mVB, 0, sizeof(CUSTOMVERTEX));
-	d3dDevice->SetFVF(D3DFVF_CUSTOMVERTEX);
+	d3dDevice->SetStreamSource(0, mVBResource.GetVertexBuffer(), 0, mVBResource.GetVertexStride());
+	d3dDevice->SetFVF(mVBResource.GetVertexFormat());
 
 	// Draw
 	effect->CommitChanges();
@@ -115,13 +106,16 @@ void Cell::UpdateVertexBuffer()
 	};
 
 	VOID* pVertices;
-	if(!mVB || FAILED(mVB->Lock(0, sizeof(Vertices), (void**)&pVertices, 0)))
+	LPDIRECT3DVERTEXBUFFER9 vertexBufferToLock = mVBResource.GetVertexBuffer();
+	assert(vertexBufferToLock);
+
+	if (!vertexBufferToLock || FAILED(vertexBufferToLock->Lock(0, sizeof(Vertices), (void**)&pVertices, 0)))
 	{
 		return;
 	}
 
 	memcpy( pVertices, Vertices, sizeof( Vertices ) );
-	mVB->Unlock();
+	vertexBufferToLock->Unlock();
 }
 
 void Cell::SetRow(int row)

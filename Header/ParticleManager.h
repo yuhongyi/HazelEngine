@@ -33,7 +33,7 @@ private:
 
 	// Render related
 	int mResourceId;
-	LPDIRECT3DVERTEXBUFFER9 mVB;
+	VertexBufferResource mVBResource;
 	virtual void UpdateVertexBuffer();
 	virtual void SetCellTemplate(Cell* cellTemplate);
 };

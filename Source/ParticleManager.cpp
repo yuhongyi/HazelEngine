@@ -16,22 +16,14 @@ Particle::Particle() :
 
 bool Particle::Initialize(LPDIRECT3DDEVICE9 d3dDevice)
 {
-	if( FAILED( d3dDevice->CreateVertexBuffer( 12 * sizeof( CUSTOMVERTEXFORPARTICLE ),
-		0, D3DFVF_CUSTOMVERTEXFORPARTICLE,
-		D3DPOOL_DEFAULT, &mVB, NULL ) ) )
-	{
-		return false;
-	}
+	mVBResource.SetVertexBufferFormat(sizeof(CUSTOMVERTEXFORPARTICLE), 12, D3DFVF_CUSTOMVERTEXFORPARTICLE);
+	mVBResource.InitResource(d3dDevice);
 
 	return true;
 }
 
 void Particle::Deinitialize()
 {
-	if(mVB)
-	{
-		mVB->Release();
-	}
 }
 
 void Particle::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
@@ -61,8 +53,8 @@ void Particle::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 	}
 
 	// Set VB
-	d3dDevice->SetStreamSource(0, mVB, 0, sizeof(CUSTOMVERTEXFORPARTICLE));
-	d3dDevice->SetFVF(D3DFVF_CUSTOMVERTEXFORPARTICLE);
+	d3dDevice->SetStreamSource(0, mVBResource.GetVertexBuffer(), 0, mVBResource.GetVertexStride());
+	d3dDevice->SetFVF(mVBResource.GetVertexFormat());
 
 	// Draw
 	effect->CommitChanges();
@@ -95,13 +87,16 @@ void Particle::UpdateVertexBuffer()
 	};
 
 	VOID* pVertices;
-	if(!mVB || FAILED(mVB->Lock(0, sizeof(Vertices), (void**)&pVertices, 0)))
+	LPDIRECT3DVERTEXBUFFER9 vertexBufferToLock = mVBResource.GetVertexBuffer();
+	assert(vertexBufferToLock);
+
+	if (!vertexBufferToLock || FAILED(vertexBufferToLock->Lock(0, sizeof(Vertices), (void**)&pVertices, 0)))
 	{
 		return;
 	}
 
 	memcpy( pVertices, Vertices, sizeof( Vertices ) );
-	mVB->Unlock();
+	vertexBufferToLock->Unlock();
 }
 
 void Particle::SetCellTemplate(Cell* cellTemplate)

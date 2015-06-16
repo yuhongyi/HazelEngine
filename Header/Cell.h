@@ -1,6 +1,7 @@
 #pragma once
 #include "Globals.h"
 #include "GameObject.h"
+#include "VertexBufferResource.h"
 
 enum CellState
 {
@@ -61,5 +62,5 @@ private:
 	virtual void UpdateVertexBuffer();
 
 	// Render related
-	LPDIRECT3DVERTEXBUFFER9 mVB;
+	VertexBufferResource mVBResource;
 };

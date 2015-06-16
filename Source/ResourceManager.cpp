@@ -13,44 +13,57 @@ ResourceManager::~ResourceManager()
 
 bool ResourceManager::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating)
 {
-	mNumResource = 0;
-	mResources.clear();
-
-	mImageResourceCount = gImageCount;
-	for(int i = 0; i < gImageCount; i++)
+	if (isRecreating)
 	{
-		ImageResource* image = new ImageResource();
-		image->LoadResource(d3dDevice, gImageList[i]);
-		if(!image->InitResource(d3dDevice))
+		for (auto resourceIter = mResources.cbegin();
+			resourceIter != mResources.cend();
+			++resourceIter)
 		{
-			return false;
+			resourceIter->second->InitResource(d3dDevice, isRecreating);
 		}
 	}
-		
-	for(int i = 0; i < gShaderCount; i++)
+	else
 	{
-		ShaderResource* shader = new ShaderResource();
-		shader->SetSource(d3dDevice, gShaderList[i]);
-		if(!shader->InitResource(d3dDevice, isRecreating))
+		mNumResource = 0;
+
+		mImageResourceCount = gImageCount;
+		for (int i = 0; i < gImageCount; i++)
 		{
-			return false;
+			ImageResource* image = new ImageResource();
+			image->LoadResource(d3dDevice, gImageList[i]);
+			if (!image->InitResource(d3dDevice))
+			{
+				return false;
+			}
+		}
+
+		for (int i = 0; i < gShaderCount; i++)
+		{
+			ShaderResource* shader = new ShaderResource();
+			shader->SetSource(d3dDevice, gShaderList[i]);
+			if (!shader->InitResource(d3dDevice, isRecreating))
+			{
+				return false;
+			}
 		}
 	}
 
 	return true;
 }
 
-void ResourceManager::ReleaseResource(bool isDeviceLost)
+void ResourceManager::ReleaseResource(bool isRecreating)
 {
-	for(auto imageIter = mResources.cbegin();
-		imageIter != mResources.cend();
-		++imageIter)
+	for (auto resourceIter = mResources.cbegin();
+		resourceIter != mResources.cend();
+		++resourceIter)
 	{
-		imageIter->second->ReleaseResource(isDeviceLost);
-		delete imageIter->second;
-	}
+		resourceIter->second->ReleaseResource(isRecreating);
 
-	mResources.clear();
+		if (!isRecreating)
+		{
+			delete resourceIter->second;
+		}
+	}
 }
 
 GameResource* ResourceManager::GetResourceById(int id)

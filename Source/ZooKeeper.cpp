@@ -148,7 +148,7 @@ void OnDeviceLost()
 	HRESULT hr;
 	assert(g_IsDeviceLost);
 
-	ResourceManager::GetInstance()->ReleaseResource();
+	ResourceManager::GetInstance()->ReleaseResource(true);
 
 	while (g_pd3dDevice->TestCooperativeLevel() != D3DERR_DEVICENOTRESET);
 
