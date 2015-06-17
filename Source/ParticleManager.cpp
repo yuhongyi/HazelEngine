@@ -34,13 +34,13 @@ void Particle::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 	}
 
 	// Set fade factor
-	D3DXHANDLE fadeFactorHandle = effect->GetParameterByName(NULL, "gParticleFadeFactor");
+	D3DXHANDLE fadeFactorHandle = effect->GetParameterByName(0, "gParticleFadeFactor");
 	effect->SetFloat(fadeFactorHandle, mParticleFadeFactor);
 
 	// Set particle time
-	D3DXHANDLE particleTimeHandle = effect->GetParameterByName(NULL, "gParticleTime");
+	D3DXHANDLE particleTimeHandle = effect->GetParameterByName(0, "gParticleTime");
 	effect->SetFloat(particleTimeHandle, mParticleTime);
-	D3DXHANDLE particleSpeedHandle = effect->GetParameterByName(NULL, "gParticleSpeed");
+	D3DXHANDLE particleSpeedHandle = effect->GetParameterByName(0, "gParticleSpeed");
 	effect->SetFloat(particleSpeedHandle, gParticleDepartSpeed);
 
 	// Set Texture
@@ -48,7 +48,7 @@ void Particle::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 	ImageResource* image = dynamic_cast<ImageResource*>(d3dResource);
 	if(image)
 	{
-		D3DXHANDLE cellTextureHandle = effect->GetParameterByName(NULL, "gCellTexture");
+		D3DXHANDLE cellTextureHandle = effect->GetParameterByName(0, "gCellTexture");
 		effect->SetTexture(cellTextureHandle, image->GetTexture());
 	}
 
@@ -210,7 +210,7 @@ void ParticleManager::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 
 	D3DXMatrixMultiply(&matWVP, &matWorld, &matProj);
 
-	D3DXHANDLE wvpMatrixHandle = effect->GetParameterByName(NULL, "gWorldViewProjectionMatrix");
+	D3DXHANDLE wvpMatrixHandle = effect->GetParameterByName(0, "gWorldViewProjectionMatrix");
 	effect->SetMatrix(wvpMatrixHandle, &matWVP);
 
 	D3DXHANDLE techniqueHandle = effect->GetTechniqueByName("RenderParticle");

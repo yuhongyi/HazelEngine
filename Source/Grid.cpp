@@ -10,7 +10,7 @@
 using namespace std;
 
 Grid::Grid():
-mCells(NULL), mWidth(1), mHeight(1), mCellInInteraction(NULL)
+mCells(nullptr), mWidth(1), mHeight(1), mCellInInteraction(nullptr)
 {
 }
 
@@ -18,7 +18,7 @@ Grid::Grid(Vector2D size) :
 	GameObject(size),
 	mWidth((int)size.X),
 	mHeight((int)size.Y),
-	mCellInInteraction(NULL)
+	mCellInInteraction(nullptr)
 {
 	mCells = new Cell[mWidth * mHeight];
 }
@@ -53,7 +53,7 @@ void Grid::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 
 	D3DXMatrixMultiply(&matWVP, &matWorld, &matProj);
 
-	D3DXHANDLE wvpMatrixHandle = effect->GetParameterByName(NULL, "gWorldViewProjectionMatrix");
+	D3DXHANDLE wvpMatrixHandle = effect->GetParameterByName(0, "gWorldViewProjectionMatrix");
 	effect->SetMatrix(wvpMatrixHandle, &matWVP);
 
 	D3DXHANDLE techniqueHandle = effect->GetTechniqueByName("RenderSceneWithTexture");
@@ -151,7 +151,7 @@ Cell* Grid::GetCell(int row, int column)
 		return &mCells[row * mWidth + column];
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void Grid::OnMouseMove(HWND hWnd, WORD mouseX, WORD mouseY, int comboState)
@@ -184,7 +184,7 @@ void Grid::HandleMouseInteraction(WORD mouseX, WORD mouseY, bool pickNewInteract
 			&& mCellInInteraction->IsAdjacentTo(hitCell))
 		{
 			mCellInInteraction->SwapWith(hitCell, false);
-			mCellInInteraction = NULL;
+			mCellInInteraction = nullptr;
 		}
 		else if(hitCell->GetCellState() == CS_Idle)
 		{

@@ -4,7 +4,7 @@
 #pragma warning(disable:4996)
 
 IndexBufferResource::IndexBufferResource() :
-mIB(NULL)
+mIB(nullptr)
 {
 	mFileSource[0] = '/0';
 }
@@ -13,7 +13,7 @@ bool IndexBufferResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecre
 {
 	if (FAILED(d3dDevice->CreateIndexBuffer(mBufferSize * GetIndexSize(),
 		0, mBufferFormat,
-		D3DPOOL_DEFAULT, &mIB, NULL)))
+		D3DPOOL_DEFAULT, &mIB, nullptr)))
 	{
 		wprintf(L"Failed to create index buffer");
 		return false;

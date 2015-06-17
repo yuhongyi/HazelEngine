@@ -74,5 +74,5 @@ GameResource* ResourceManager::GetResourceById(int id)
 		return resourceIter->second;
 	}
 
-	return NULL;
+	return nullptr;
 }

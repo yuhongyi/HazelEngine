@@ -33,7 +33,7 @@ bool ZooKeeperGame::Initialize(LPDIRECT3DDEVICE9 d3dDevice)
 	InputManager::GetInstance()->RegisterInputReceiver(this);
 	
 	// Set random seed for game
-	srand((unsigned int)time(NULL));
+	srand((unsigned int)time(nullptr));
 
 	return true;
 }

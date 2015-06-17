@@ -3,7 +3,7 @@
 #include "GameConfig.h"
 
 GridSimulator::GridSimulator() :
-	mSimGrid(NULL),
+	mSimGrid(nullptr),
 	mGridWidth(0),
 	mGridHeight(0)
 {

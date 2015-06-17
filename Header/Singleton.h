@@ -9,7 +9,7 @@ class Singleton
 public:
 	static T* GetInstance()
 	{
-		if(mInstance == NULL)
+		if(mInstance == nullptr)
 		{
 			mInstance = new T();
 		}
@@ -19,10 +19,10 @@ public:
 
 	void Destroy()
 	{
-		if(mInstance != NULL)
+		if(mInstance != nullptr)
 		{
 			delete mInstance;
-			mInstance = NULL;
+			mInstance = nullptr;
 		}
 	}
 private:
@@ -30,4 +30,4 @@ private:
 };
 
 template< class T >
-T *Singleton<T>::mInstance = NULL;
+T *Singleton<T>::mInstance = nullptr;

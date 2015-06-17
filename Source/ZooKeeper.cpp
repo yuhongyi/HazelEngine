@@ -13,8 +13,8 @@
 //-----------------------------------------------------------------------------
 // Global variables
 //-----------------------------------------------------------------------------
-LPDIRECT3D9				g_pD3D = NULL; // Used to create the D3DDevice
-LPDIRECT3DDEVICE9       g_pd3dDevice = NULL; // Our rendering device
+LPDIRECT3D9				g_pD3D = nullptr; // Used to create the D3DDevice
+LPDIRECT3DDEVICE9       g_pd3dDevice = nullptr; // Our rendering device
 int						g_IsDeviceLost = false;
 
 
@@ -25,7 +25,7 @@ int						g_IsDeviceLost = false;
 HRESULT InitD3D(HWND hWnd)
 {
 	// Create the D3D object.
-	if (NULL == (g_pD3D = Direct3DCreate9(D3D_SDK_VERSION)))
+	if (nullptr == (g_pD3D = Direct3DCreate9(D3D_SDK_VERSION)))
 		return E_FAIL;
 
 	// Set up the structure used to create the D3DDevice. Since we are now
@@ -64,7 +64,7 @@ void Render(float fElapsedTime)
 	HRESULT hr;
 
 	// Clear the render target and the zbuffer 
-	V(g_pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_ARGB(0, 45, 50, 170), 1.0f, 0));
+	V(g_pd3dDevice->Clear(0, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_ARGB(0, 45, 50, 170), 1.0f, 0));
 
 	// Render the scene
 	if (SUCCEEDED(g_pd3dDevice->BeginScene()))
@@ -82,7 +82,7 @@ void Render(float fElapsedTime)
 	}
 
 	// Present the backbuffer contents to the display
-	hr = g_pd3dDevice->Present(NULL, NULL, NULL, NULL);
+	hr = g_pd3dDevice->Present(nullptr, nullptr, nullptr, nullptr);
 
 	if (hr == D3DERR_DEVICELOST)
 	{
@@ -150,7 +150,10 @@ void OnDeviceLost()
 
 	ResourceManager::GetInstance()->ReleaseResource(true);
 
-	while (g_pd3dDevice->TestCooperativeLevel() != D3DERR_DEVICENOTRESET);
+	while (g_pd3dDevice->TestCooperativeLevel() != D3DERR_DEVICENOTRESET)
+	{
+		Sleep(100);
+	}
 
 	D3DPRESENT_PARAMETERS d3dpp;
 	ZeroMemory(&d3dpp, sizeof(d3dpp));
@@ -160,15 +163,13 @@ void OnDeviceLost()
 	d3dpp.EnableAutoDepthStencil = TRUE;
 	d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8;
 
-	hr = g_pd3dDevice->Reset(&d3dpp);
-	WCHAR sdd[1000];
-	if (hr != S_OK)
+	if(FAILED(hr = g_pd3dDevice->Reset(&d3dpp)))
 	{
-		wsprintf(sdd, L"Error: %s error description: %s\n",
+		wprintf(L"Error: %s error description: %s\n",
 			DXGetErrorString(hr),
 			DXGetErrorDescription(hr));
+		return;
 	}
-	//assert(hr == S_OK);
 	g_IsDeviceLost = false;
 
 	ResourceManager::GetInstance()->InitResource(g_pd3dDevice, true);
@@ -213,15 +214,15 @@ INT WINAPI wWinMain(HINSTANCE hInst, HINSTANCE, LPWSTR, INT)
 	WNDCLASSEX wc =
 	{
 		sizeof(WNDCLASSEX), CS_CLASSDC, MsgProc, 0L, 0L,
-		GetModuleHandle(NULL), NULL, NULL, NULL, NULL,
-		L"D3D Tutorial", NULL
+		GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr,
+		L"D3D Tutorial", nullptr
 	};
 	RegisterClassEx(&wc);
 
 	// Create the application's window
 	HWND hWnd = CreateWindow(L"D3D Tutorial", L"Hazel Engine",
 		WS_OVERLAPPEDWINDOW, 100, 100, gGridWidth * gCellSize, gGridHeight * gCellSize,
-		NULL, NULL, wc.hInstance, NULL);
+		nullptr, nullptr, wc.hInstance, nullptr);
 
 	// Initialize Direct3D
 	if (SUCCEEDED(InitD3D(hWnd)))
@@ -238,7 +239,7 @@ INT WINAPI wWinMain(HINSTANCE hInst, HINSTANCE, LPWSTR, INT)
 			ZeroMemory(&msg, sizeof(msg));
 			while (msg.message != WM_QUIT)
 			{
-				if (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
+				if (PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE))
 				{
 					TranslateMessage(&msg);
 					DispatchMessage(&msg);
@@ -250,7 +251,7 @@ INT WINAPI wWinMain(HINSTANCE hInst, HINSTANCE, LPWSTR, INT)
 						OnDeviceLost();
 					}
 
-					assert(!g_IsDeviceLost);
+					//assert(!g_IsDeviceLost);
 					Tick();
 				}
 			}

@@ -4,7 +4,7 @@
 #pragma warning(disable:4996)
 
 VertexBufferResource::VertexBufferResource() :
-mVB(NULL)
+mVB(nullptr)
 {
 	mFileSource[0] = '/0';
 }
@@ -13,7 +13,7 @@ bool VertexBufferResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecr
 {
 	if (FAILED(d3dDevice->CreateVertexBuffer(mVertexSize * mNumVertices,
 		0, mVertexFormat,
-		D3DPOOL_DEFAULT, &mVB, NULL)))
+		D3DPOOL_DEFAULT, &mVB, nullptr)))
 	{
 		wprintf(L"Failed to create vertex buffer");
 		return false;

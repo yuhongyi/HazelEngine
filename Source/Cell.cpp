@@ -8,7 +8,7 @@ Cell::Cell():
 	mPrevCellState(CS_Idle),
 	mCellState(CS_Idle),
 	mFallingSpeed(0.f),
-	mCellBelow(NULL)
+	mCellBelow(nullptr)
 {
 	mSize.X = (float)gCellSize;
 	mSize.Y = (float)gCellSize;
@@ -33,7 +33,7 @@ void Cell::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 	ImageResource* image = dynamic_cast<ImageResource*>(d3dResource);
 	if(image)
 	{
-		D3DXHANDLE cellTextureHandle = effect->GetParameterByName(NULL, "gCellTexture");
+		D3DXHANDLE cellTextureHandle = effect->GetParameterByName(0, "gCellTexture");
 		effect->SetTexture(cellTextureHandle, image->GetTexture());
 	}
 
@@ -268,7 +268,7 @@ void Cell::TickSwitching(float deltaTime)
 
 	if(mPosition == mTargetPosition)
 	{
-		if(GetSwappedCell() != NULL)
+		if(GetSwappedCell() != nullptr)
 		{
 			SetCellState(CS_PendingCheck);
 		}
@@ -298,8 +298,8 @@ void Cell::SwapWith(Cell* other, bool isSwapBack)
 	}
 	else
 	{
-		this->SetSwappedCell(NULL);
-		other->SetSwappedCell(NULL);
+		this->SetSwappedCell(nullptr);
+		other->SetSwappedCell(nullptr);
 	}
 
 	this->SetCellState(CS_Switching);
