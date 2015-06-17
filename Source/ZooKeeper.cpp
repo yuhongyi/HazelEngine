@@ -168,7 +168,7 @@ void OnDeviceLost()
 			DXGetErrorString(hr),
 			DXGetErrorDescription(hr));
 	}
-	assert(hr == S_OK);
+	//assert(hr == S_OK);
 	g_IsDeviceLost = false;
 
 	ResourceManager::GetInstance()->InitResource(g_pd3dDevice, true);

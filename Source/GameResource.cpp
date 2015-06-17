@@ -10,7 +10,10 @@ mResourceId(-1)
 
 bool GameResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating)
 {
-	ResourceManager::GetInstance()->AddResource(this);
+	if(!isRecreating)
+	{
+		ResourceManager::GetInstance()->AddResource(this);
+	}
 	return true;
 }
 
