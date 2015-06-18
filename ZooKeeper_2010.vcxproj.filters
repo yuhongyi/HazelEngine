@@ -56,12 +56,6 @@
     <None Include="Shaders\BasicHLSL.fx">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="Shaders\BaseMaterial.shader">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\ParticleMaterial.shader">
-      <Filter>Shaders</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\InputManager.cpp">

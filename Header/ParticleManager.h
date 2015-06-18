@@ -16,6 +16,7 @@ public:
 	virtual void Deinitialize();
 	virtual void Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect);
 	virtual void Tick(float deltaTime);
+	virtual void SetPosition(Vector2D newPosition);
 
 	// Methods
 	virtual bool Play(Cell* cellTemplate, float lifetime);
@@ -34,7 +35,8 @@ private:
 	// Render related
 	int mResourceId;
 	VertexBufferResource mVBResource;
-	virtual void UpdateVertexBuffer();
+	D3DXMATRIX mWVPMatrix;
+	virtual void OnPositionUpdated();
 	virtual void SetCellTemplate(Cell* cellTemplate);
 };
 

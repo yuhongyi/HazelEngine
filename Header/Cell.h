@@ -27,9 +27,9 @@ public:
 	virtual void Deinitialize();
 	virtual void Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect);
 	virtual void Tick(float deltaTime);
+	virtual void SetPosition(Vector2D newPosition);
 
 	// methods
-	void SetPosition(Vector2D newPosition);
 	void SetTargetPosition(Vector2D targetPosition);
 	void SetResourceID(int resourceId);
 	int GetResourceID() const;

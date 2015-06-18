@@ -12,12 +12,43 @@ Particle::Particle() :
 	mStartTime(0),
 	mResourceId(-1)
 {
+	mSize.X = (float)gCellSize;
+	mSize.Y = (float)gCellSize;
 }
 
 bool Particle::Initialize(LPDIRECT3DDEVICE9 d3dDevice)
 {
 	mVBResource.SetVertexBufferFormat(sizeof(CUSTOMVERTEXFORPARTICLE), 12, D3DFVF_CUSTOMVERTEXFORPARTICLE);
 	mVBResource.InitResource(d3dDevice);
+
+	D3DCOLOR cellDiffuse = 0xffffffff;
+	CUSTOMVERTEXFORPARTICLE Vertices[] =
+	{
+		{ mSize.X * 0.5f, mSize.Y * 0.5f, 0.f, D3DXVECTOR3(0.f, -1.f, 0.f), cellDiffuse, 0.5f, 0.5f }, // x, y, z, tex2
+		{ 0.f, 0.f, 0.f, D3DXVECTOR3(0.f, -1.f, 0.f), cellDiffuse, 0.f, 0.f },
+		{ mSize.X, 0.f, 0.f, D3DXVECTOR3(0.f, -1.f, 0.f), cellDiffuse, 1.f, 0.f },
+		{ mSize.X * 0.5f, mSize.Y * 0.5f, 0.f, D3DXVECTOR3(1.f, 0.f, 0.f), cellDiffuse, 0.5f, 0.5f },
+		{ mSize.X, 0.f, 0.f, D3DXVECTOR3(1.f, 0.f, 0.f), cellDiffuse, 1.f, 0.f },
+		{ mSize.X, mSize.Y, 0.f, D3DXVECTOR3(1.f, 0.f, 0.f), cellDiffuse, 1.f, 1.f },
+		{ mSize.X * 0.5f, mSize.Y * 0.5f, 0.f, D3DXVECTOR3(0.f, 1.f, 0.f), cellDiffuse, 0.5f, 0.5f },
+		{ mSize.X, mSize.Y, 0.f, D3DXVECTOR3(0.f, 1.f, 0.f), cellDiffuse, 1.f, 1.f },
+		{ 0.f, mSize.Y, 0.f, D3DXVECTOR3(0.f, 1.f, 0.f), cellDiffuse, 0.f, 1.f },
+		{ mSize.X * 0.5f, mSize.Y * 0.5f, 0.f, D3DXVECTOR3(-1.f, 0.f, 0.f), cellDiffuse, 0.5f, 0.5f },
+		{ 0.f, mSize.Y, 0.f, D3DXVECTOR3(-1.f, 0.f, 0.f), cellDiffuse, 0.f, 1.f },
+		{ 0.f, 0.f, 0.f, D3DXVECTOR3(-1.f, 0.f, 0.f), cellDiffuse, 0.f, 0.f },
+	};
+
+	VOID* pVertices;
+	LPDIRECT3DVERTEXBUFFER9 vertexBufferToLock = mVBResource.GetVertexBuffer();
+	assert(vertexBufferToLock);
+
+	if (!vertexBufferToLock || FAILED(vertexBufferToLock->Lock(0, sizeof(Vertices), (void**)&pVertices, 0)))
+	{
+		return false;
+	}
+
+	memcpy(pVertices, Vertices, sizeof(Vertices));
+	vertexBufferToLock->Unlock();
 
 	return true;
 }
@@ -32,6 +63,10 @@ void Particle::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 	{
 		return;
 	}
+
+	// Set transform matrix
+	D3DXHANDLE wvpMatrixHandle = effect->GetParameterByName(0, "gWorldViewProjectionMatrix");
+	effect->SetMatrix(wvpMatrixHandle, &mWVPMatrix);
 
 	// Set fade factor
 	D3DXHANDLE fadeFactorHandle = effect->GetParameterByName(0, "gParticleFadeFactor");
@@ -67,36 +102,36 @@ void Particle::Tick(float deltaTime)
 	mParticleFadeFactor = max<float>(min<float>(float(1.0 - (mParticleTime / mLifeTime)), 1.f), 0.f);
 }
 
-void Particle::UpdateVertexBuffer()
+void Particle::SetPosition(Vector2D newPosition)
 {
-	D3DCOLOR cellDiffuse = 0xffffffff;
-	CUSTOMVERTEXFORPARTICLE Vertices[] =
+	if (mPosition != newPosition)
 	{
-		{ mPosition.X + mSize.X * 0.5f,  mPosition.Y + mSize.Y * 0.5f, 0.f, D3DXVECTOR3(0.f, -1.f, 0.f), cellDiffuse, 0.5f, 0.5f}, // x, y, z, tex2
-		{ mPosition.X,  mPosition.Y, 0.f, D3DXVECTOR3(0.f, -1.f, 0.f), cellDiffuse, 0.f, 0.f}, 
-		{ mPosition.X + mSize.X,  mPosition.Y, 0.f, D3DXVECTOR3(0.f, -1.f, 0.f), cellDiffuse, 1.f, 0.f}, 
-		{ mPosition.X + mSize.X * 0.5f,  mPosition.Y + mSize.Y * 0.5f, 0.f, D3DXVECTOR3(1.f, 0.f, 0.f), cellDiffuse, 0.5f, 0.5f},
-		{ mPosition.X + mSize.X,  mPosition.Y, 0.f, D3DXVECTOR3(1.f, 0.f, 0.f), cellDiffuse, 1.f, 0.f}, 
-		{ mPosition.X + mSize.X,  mPosition.Y + mSize.Y, 0.f, D3DXVECTOR3(1.f, 0.f, 0.f), cellDiffuse, 1.f, 1.f}, 
-		{ mPosition.X + mSize.X * 0.5f,  mPosition.Y + mSize.Y * 0.5f, 0.f, D3DXVECTOR3(0.f, 1.f, 0.f), cellDiffuse, 0.5f, 0.5f},
-		{ mPosition.X + mSize.X,  mPosition.Y + mSize.Y, 0.f, D3DXVECTOR3(0.f, 1.f, 0.f), cellDiffuse, 1.f, 1.f}, 
-		{ mPosition.X,  mPosition.Y + mSize.Y, 0.f, D3DXVECTOR3(0.f, 1.f, 0.f), cellDiffuse, 0.f, 1.f}, 
-		{ mPosition.X + mSize.X * 0.5f,  mPosition.Y + mSize.Y * 0.5f, 0.f, D3DXVECTOR3(-1.f, 0.f, 0.f), cellDiffuse, 0.5f, 0.5f},
-		{ mPosition.X,  mPosition.Y + mSize.Y, 0.f, D3DXVECTOR3(-1.f, 0.f, 0.f), cellDiffuse, 0.f, 1.f}, 
-		{ mPosition.X,  mPosition.Y, 0.f, D3DXVECTOR3(-1.f, 0.f, 0.f), cellDiffuse, 0.f, 0.f}, 
-	};
-
-	VOID* pVertices;
-	LPDIRECT3DVERTEXBUFFER9 vertexBufferToLock = mVBResource.GetVertexBuffer();
-	assert(vertexBufferToLock);
-
-	if (!vertexBufferToLock || FAILED(vertexBufferToLock->Lock(0, sizeof(Vertices), (void**)&pVertices, 0)))
-	{
-		return;
+		GameObject::SetPosition(newPosition);
+		OnPositionUpdated();
 	}
+}
 
-	memcpy( pVertices, Vertices, sizeof( Vertices ) );
-	vertexBufferToLock->Unlock();
+void Particle::OnPositionUpdated()
+{
+	// Set WVP matrix
+	D3DXMATRIX matWorld, matScale, matTrans, matProj;
+
+	D3DXMatrixScaling(&matScale, 1.0f, -1.0f, 1.0f);
+	D3DXMatrixTranslation(&matTrans, 0.5f, gGridHeight * gCellSize + 0.5f, 0.0f);
+	D3DXMatrixMultiply(&matWorld, &matScale, &matTrans);
+
+	D3DXMATRIX matParticleTrans;
+	D3DXMATRIX matParticleWorldTrans;
+	D3DXMatrixTranslation(&matParticleTrans, mPosition.X, -mPosition.Y, 0.0f);
+	D3DXMatrixMultiply(&matParticleWorldTrans, &matWorld, &matParticleTrans);
+
+	D3DXMatrixOrthoOffCenterLH(
+		&matProj,
+		0.0f, (float)gGridWidth * gCellSize,
+		0.0f, (float)gGridHeight * gCellSize,
+		0.0f, 1.0f);
+
+	D3DXMatrixMultiply(&mWVPMatrix, &matParticleWorldTrans, &matProj);
 }
 
 void Particle::SetCellTemplate(Cell* cellTemplate)
@@ -104,9 +139,7 @@ void Particle::SetCellTemplate(Cell* cellTemplate)
 	if(cellTemplate)
 	{
 		mResourceId = cellTemplate->GetResourceID();
-		SetSize(cellTemplate->GetSize());
 		SetPosition(cellTemplate->GetPosition());
-		UpdateVertexBuffer();
 	}
 }
 
@@ -121,6 +154,7 @@ bool Particle::Play(Cell* cellTemplate, float lifetime)
 	mLifeTime = lifetime;
 	mStartTime = 0.f;
 	mIsActive = true;
+	mParticleTime = 0.f;
 
 	return true;
 }
@@ -194,24 +228,6 @@ void ParticleManager::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 {
 	HRESULT hr;
 	UINT iPass, cPasses;
-
-	// Set WVP matrix
-	D3DXMATRIX matWorld, matScale, matTrans, matProj, matWVP;
-
-	D3DXMatrixScaling(&matScale, 1.0f, -1.0f, 1.0f);
-	D3DXMatrixTranslation(&matTrans, -0.5f, gGridHeight * gCellSize + 0.5f, 0.0f);
-	D3DXMatrixMultiply(&matWorld, &matScale, &matTrans);
-
-	D3DXMatrixOrthoOffCenterLH(
-		&matProj,
-		0.0f, (float)gGridWidth * gCellSize,
-		0.0f, (float)gGridHeight * gCellSize,
-		0.0f, 1.0f);
-
-	D3DXMatrixMultiply(&matWVP, &matWorld, &matProj);
-
-	D3DXHANDLE wvpMatrixHandle = effect->GetParameterByName(0, "gWorldViewProjectionMatrix");
-	effect->SetMatrix(wvpMatrixHandle, &matWVP);
 
 	D3DXHANDLE techniqueHandle = effect->GetTechniqueByName("RenderParticle");
 	effect->SetTechnique(techniqueHandle);

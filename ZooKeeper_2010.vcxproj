@@ -425,9 +425,7 @@
     <None Include="Resources\Images\RedDog.png" />
     <None Include="Resources\Images\Woof.png" />
     <None Include="Resources\Sound\MusicMono.wav" />
-    <None Include="Shaders\BaseMaterial.shader" />
     <None Include="Shaders\BasicHLSL.fx" />
-    <None Include="Shaders\ParticleMaterial.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Cell.cpp" />

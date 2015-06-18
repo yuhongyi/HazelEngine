@@ -16,7 +16,7 @@ public:
 	virtual void Tick(float deltaTime) = 0;
 	int GetID();
 	void SetID(int id);
-	void SetPosition(Vector2D newPosition);
+	virtual void SetPosition(Vector2D newPosition);
 	Vector2D GetPosition() const;
 	void SetSize(Vector2D newSize);
 	Vector2D GetSize() const;
