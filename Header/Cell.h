@@ -2,6 +2,9 @@
 #include "Globals.h"
 #include "GameObject.h"
 #include "VertexBufferResource.h"
+#include "Grid.h"
+
+class Grid;
 
 enum CellState
 {
@@ -17,7 +20,7 @@ class Cell : public GameObject
 {
 public:
 	// ctor & dtor
-	Cell();
+	Cell(Grid* parentGrid);
 	
 	// GameObject
 	virtual bool Initialize(LPDIRECT3DDEVICE9 d3dDevice);
@@ -51,6 +54,8 @@ private:
 	int mRow;
 	int mColumn;
 	Cell* mCellBelow;
+	Grid* mParentGrid;
+	D3DXMATRIX mWVPMatrix;
 
 	// Physics
 	Cell* mSwappedCell;
@@ -59,7 +64,6 @@ private:
 	virtual void TickFalling(float deltaTime);
 	virtual void TickSwitching(float deltaTime);
 	virtual void OnPositionUpdated();
-	virtual void UpdateVertexBuffer();
 
 	// Render related
 	VertexBufferResource mVBResource;

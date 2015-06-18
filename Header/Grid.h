@@ -2,6 +2,11 @@
 #include "Cell.h"
 #include "GameObject.h"
 #include "Interfaces.h"
+#include "vector"
+
+using namespace std;
+
+class Cell;
 
 class Grid : public GameObject, public IInputReceiver
 {
@@ -25,12 +30,17 @@ public:
 	// methods
 	virtual void Initialize();
 	Cell* GetCell(int row, int column);
+	const D3DXMATRIX& GetWorldMatrix() { return mWorldMatrix; }
+	const D3DXMATRIX& GetProjectionMatrix() { return mProjectionMatrix; }
+	void UpdateWVPMatrix();
 
 private:
 	int mWidth;
 	int mHeight;
-	Cell* mCells;
+	vector<Cell*> mCells;
 	Cell* mCellInInteraction;
+	D3DXMATRIX mWorldMatrix;
+	D3DXMATRIX mProjectionMatrix;
 
 	bool FindAndProcessMatch();
 	virtual void HandleMouseInteraction(WORD mouseX, WORD mouseY, bool pickNewInteractiveCell);

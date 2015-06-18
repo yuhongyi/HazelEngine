@@ -3,12 +3,13 @@
 #include "ImageResource.h"
 #include "ResourceManager.h"
 
-Cell::Cell():
+Cell::Cell(Grid* parentGrid):
 	mResourceId(-1),
 	mPrevCellState(CS_Idle),
 	mCellState(CS_Idle),
 	mFallingSpeed(0.f),
-	mCellBelow(nullptr)
+	mCellBelow(nullptr),
+	mParentGrid(parentGrid)
 {
 	mSize.X = (float)gCellSize;
 	mSize.Y = (float)gCellSize;
@@ -18,6 +19,27 @@ bool Cell::Initialize(LPDIRECT3DDEVICE9 d3dDevice)
 {
 	mVBResource.SetVertexBufferFormat(sizeof(CUSTOMVERTEX), 4, D3DFVF_CUSTOMVERTEX);
 	mVBResource.InitResource(d3dDevice);
+
+	D3DCOLOR cellDiffuse = 0xffffffff;
+	CUSTOMVERTEX Vertices[] =
+	{
+		{ 0.f, 0.f, 0.f, cellDiffuse, 0.f, 0.f }, // x, y, z, tex2
+		{ mSize.X, 0.f, 0.f, cellDiffuse, 1.f, 0.f },
+		{ 0.f, mSize.Y, 0.f, cellDiffuse, 0.f, 1.f },
+		{ mSize.X, mSize.Y, 0.f, cellDiffuse, 1.f, 1.f },
+	};
+
+	VOID* pVertices;
+	LPDIRECT3DVERTEXBUFFER9 vertexBufferToLock = mVBResource.GetVertexBuffer();
+	assert(vertexBufferToLock);
+
+	if (!vertexBufferToLock || FAILED(vertexBufferToLock->Lock(0, sizeof(Vertices), (void**)&pVertices, 0)))
+	{
+		return false;
+	}
+
+	memcpy(pVertices, Vertices, sizeof(Vertices));
+	vertexBufferToLock->Unlock();
 
 	return true;
 }
@@ -41,6 +63,10 @@ void Cell::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 	d3dDevice->SetStreamSource(0, mVBResource.GetVertexBuffer(), 0, mVBResource.GetVertexStride());
 	d3dDevice->SetFVF(mVBResource.GetVertexFormat());
 
+	// Update matrix
+	D3DXHANDLE wvpMatrixHandle = effect->GetParameterByName(0, "gWorldViewProjectionMatrix");
+	effect->SetMatrix(wvpMatrixHandle, &mWVPMatrix);
+
 	// Draw
 	effect->CommitChanges();
 	d3dDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
@@ -62,10 +88,12 @@ void Cell::SetTargetPosition(Vector2D targetPosition)
 
 void Cell::OnPositionUpdated()
 {
-	// Update VB
-	UpdateVertexBuffer();
+	D3DXMATRIX matCellTrans;
+	D3DXMATRIX matCellWorldTrans;
+	D3DXMatrixTranslation(&matCellTrans, mPosition.X, -mPosition.Y, 0.0f);
+	D3DXMatrixMultiply(&matCellWorldTrans, &mParentGrid->GetWorldMatrix(), &matCellTrans);
+	D3DXMatrixMultiply(&mWVPMatrix, &matCellWorldTrans, &mParentGrid->GetProjectionMatrix());
 }
-
 
 void Cell::SetResourceID(int resourceId)
 {
@@ -75,47 +103,6 @@ void Cell::SetResourceID(int resourceId)
 int Cell::GetResourceID() const
 {
 	return mResourceId;
-}
-
-void Cell::UpdateVertexBuffer()
-{
-	D3DCOLOR cellDiffuse = 0xffffffff;
-#if COLORDEBUGGING
-	switch(mCellState)
-	{
-	case CS_Idle:
-		cellDiffuse = 0xffffffff;
-		break;
-	case CS_InInteraction:
-		cellDiffuse = 0xffff0000;
-		break;
-	case CS_Vanish:
-		cellDiffuse = 0xff00ff00;
-		break;
-	case CS_Falling:
-		cellDiffuse = 0xff0000ff;
-		break;
-	}
-#endif
-	CUSTOMVERTEX Vertices[] =
-	{
-		{ mPosition.X,  mPosition.Y, 0.f, cellDiffuse, 0.f, 0.f}, // x, y, z, tex2
-		{ mPosition.X + mSize.X,  mPosition.Y, 0.f, cellDiffuse, 1.f, 0.f}, 
-		{ mPosition.X,  mPosition.Y + mSize.Y, 0.f, cellDiffuse, 0.f, 1.f}, 
-		{ mPosition.X + mSize.X,  mPosition.Y + mSize.Y, 0.f, cellDiffuse, 1.f, 1.f}, 
-	};
-
-	VOID* pVertices;
-	LPDIRECT3DVERTEXBUFFER9 vertexBufferToLock = mVBResource.GetVertexBuffer();
-	assert(vertexBufferToLock);
-
-	if (!vertexBufferToLock || FAILED(vertexBufferToLock->Lock(0, sizeof(Vertices), (void**)&pVertices, 0)))
-	{
-		return;
-	}
-
-	memcpy( pVertices, Vertices, sizeof( Vertices ) );
-	vertexBufferToLock->Unlock();
 }
 
 void Cell::SetRow(int row)
@@ -141,9 +128,6 @@ int Cell::GetColumn() const
 void Cell::SetCellState(CellState newCellState)
 {
 	mCellState = newCellState;
-#if COLORDEBUGGING
-	UpdateVertexBuffer();
-#endif
 }
 
 CellState Cell::GetCellState() const

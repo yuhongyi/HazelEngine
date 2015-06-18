@@ -10,7 +10,7 @@
 using namespace std;
 
 Grid::Grid():
-mCells(nullptr), mWidth(1), mHeight(1), mCellInInteraction(nullptr)
+mWidth(1), mHeight(1), mCellInInteraction(nullptr)
 {
 }
 
@@ -20,41 +20,42 @@ Grid::Grid(Vector2D size) :
 	mHeight((int)size.Y),
 	mCellInInteraction(nullptr)
 {
-	mCells = new Cell[mWidth * mHeight];
+	for (int i = 0; i < mWidth * mHeight; i++)
+	{
+		mCells.push_back(new Cell(this));
+	}
 }
 
 Grid::~Grid()
 {
-	SAFE_DELETE_ARRAY(mCells);
+	for (auto cell = mCells.begin(); cell != mCells.end(); ++cell)
+	{
+		delete *cell;
+	}
+
+	mCells.clear();
+}
+
+void Grid::UpdateWVPMatrix()
+{
+	// Set WVP matrix
+	D3DXMATRIX matScale, matTrans;
+
+	D3DXMatrixScaling(&matScale, 1.0f, -1.0f, 1.0f);
+	D3DXMatrixTranslation(&matTrans, -0.5f, mHeight * gCellSize + 0.5f, 0.0f);
+	D3DXMatrixMultiply(&mWorldMatrix, &matScale, &matTrans);
+
+	D3DXMatrixOrthoOffCenterLH(
+		&mProjectionMatrix,
+		0.0f, (float)mWidth * gCellSize,
+		0.0f, (float)mHeight * gCellSize,
+		0.0f, 1.0f);
 }
 
 void Grid::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 {
-	if(!mCells)
-	{
-		return;
-	}
-
 	HRESULT hr;
 	UINT iPass, cPasses;
-
-	// Set WVP matrix
-	D3DXMATRIX matWorld, matScale, matTrans, matProj, matWVP;
-
-	D3DXMatrixScaling(&matScale, 1.0f, -1.0f, 1.0f);
-	D3DXMatrixTranslation(&matTrans, -0.5f, mHeight * gCellSize + 0.5f, 0.0f);
-	D3DXMatrixMultiply(&matWorld, &matScale, &matTrans);
-
-	D3DXMatrixOrthoOffCenterLH(
-		&matProj,
-		0.0f, (float)mWidth * gCellSize,
-		0.0f, (float)mHeight * gCellSize,
-		0.0f, 1.0f);
-
-	D3DXMatrixMultiply(&matWVP, &matWorld, &matProj);
-
-	D3DXHANDLE wvpMatrixHandle = effect->GetParameterByName(0, "gWorldViewProjectionMatrix");
-	effect->SetMatrix(wvpMatrixHandle, &matWVP);
 
 	D3DXHANDLE techniqueHandle = effect->GetTechniqueByName("RenderSceneWithTexture");
 	effect->SetTechnique(techniqueHandle);
@@ -67,7 +68,7 @@ void Grid::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 		// Render
 		for(int i = 0; i < mWidth * mHeight; i++)
 		{
-			mCells[i].Render(d3dDevice, effect);
+			mCells[i]->Render(d3dDevice, effect);
 		}
 
 		V(effect->EndPass());
@@ -77,15 +78,12 @@ void Grid::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 
 bool Grid::Initialize(LPDIRECT3DDEVICE9 d3dDevice)
 {
-	if(!mCells)
-	{
-		return false;
-	}
+	UpdateWVPMatrix();
 
 	// Initialize cells
 	for(int i = 0; i < mWidth * mHeight; i++)
 	{
-		if(!mCells[i].Initialize(d3dDevice))
+		if (!mCells[i]->Initialize(d3dDevice))
 		{
 			return false;
 		}
@@ -94,20 +92,20 @@ bool Grid::Initialize(LPDIRECT3DDEVICE9 d3dDevice)
 	// Initialize relative position and size of cell
 	for(int i = 0; i < mWidth * mHeight; i++)
 	{
-		Cell& currentCell = mCells[i];
+		Cell* currentCell = mCells[i];
 		int row = i / mWidth;
 		int column = i % mWidth;
 
-		currentCell.SetSize(Vector2D(static_cast<float>(gCellSize), static_cast<float>(gCellSize)));
-		currentCell.SetPosition(Vector2D(static_cast<float>(gCellSize * column), static_cast<float>(gCellSize * row)));
-		currentCell.SetTargetPosition(currentCell.GetPosition());
-		currentCell.SetResourceID(ResourceManager::GetInstance()->GetRandomImageResourceId());
-		currentCell.SetRow(row);
-		currentCell.SetColumn(column);
+		currentCell->SetSize(Vector2D(static_cast<float>(gCellSize), static_cast<float>(gCellSize)));
+		currentCell->SetPosition(Vector2D(static_cast<float>(gCellSize * column), static_cast<float>(gCellSize * row)));
+		currentCell->SetTargetPosition(currentCell->GetPosition());
+		currentCell->SetResourceID(ResourceManager::GetInstance()->GetRandomImageResourceId());
+		currentCell->SetRow(row);
+		currentCell->SetColumn(column);
 
 		if(row < mHeight - 1)
 		{
-			currentCell.SetCellBelow(GetCell(row + 1, column));
+			currentCell->SetCellBelow(GetCell(row + 1, column));
 		}
 	}
 
@@ -122,33 +120,24 @@ bool Grid::Initialize(LPDIRECT3DDEVICE9 d3dDevice)
 
 void Grid::Deinitialize()
 {
-	if(!mCells)
-	{
-		return;
-	}
 	for(int i = 0; i < mWidth * mHeight; i++)
 	{
-		mCells[i].Deinitialize();
+		mCells[i]->Deinitialize();
 	}
 }
 
 void Grid::Initialize()
 {
-	if(!mCells)
-	{
-		return;
-	}
 }
 
 Cell* Grid::GetCell(int row, int column)
 {
-	if(mCells
-		&&row >= 0
+	if(row >= 0
 		&& row < mHeight
 		&& column >=0
 		&& column < mWidth)
 	{
-		return &mCells[row * mWidth + column];
+		return mCells[row * mWidth + column];
 	}
 
 	return nullptr;
@@ -251,7 +240,7 @@ void Grid::Tick(float deltaTime)
 	// Tick cells
 	for(int i = 0; i < mWidth * mHeight; i++)
 	{
-		mCells[i].Tick(deltaTime);
+		mCells[i]->Tick(deltaTime);
 	}
 }
 
@@ -330,8 +319,8 @@ bool Grid::HasAnyMovement()
 	// All cells need to be stable
 	for(int i = 0; i < mHeight * mHeight; i++)
 	{
-		if(mCells[i].GetCellState() != CS_Idle
-			&& mCells[i].GetCellState() != CS_InInteraction)
+		if(mCells[i]->GetCellState() != CS_Idle
+			&& mCells[i]->GetCellState() != CS_InInteraction)
 		{
 			return true;
 		}
@@ -357,7 +346,7 @@ void Grid::VanishAllCells()
 {
 	for(int i = 0; i < mHeight * mWidth; i++)
 	{
-		mCells[i].SetCellState(CS_Vanish);
+		mCells[i]->SetCellState(CS_Vanish);
 	}
 }
 
