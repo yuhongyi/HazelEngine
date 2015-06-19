@@ -1,25 +1,25 @@
 #include "Globals.h"
 #include "Cell.h"
+#include "Grid.h"
 #include "ImageResource.h"
 #include "ResourceManager.h"
 
 Cell::Cell(Grid* parentGrid):
-	mResourceId(-1),
-	mPrevCellState(CS_Idle),
-	mCellState(CS_Idle),
+	mPrevCellState(CellState::Idle),
+	mCellState(CellState::Idle),
 	mFallingSpeed(0.f),
 	mCellBelow(nullptr),
-	mParentGrid(parentGrid)
+	mParentGrid(parentGrid),
+	mVBResource(nullptr)
 {
+	mVBResource = new VertexBufferResource();
+
 	mSize.X = (float)gCellSize;
 	mSize.Y = (float)gCellSize;
 }
 
 bool Cell::Initialize(LPDIRECT3DDEVICE9 d3dDevice)
 {
-	mVBResource.SetVertexBufferFormat(sizeof(CUSTOMVERTEX), 4, D3DFVF_CUSTOMVERTEX);
-	mVBResource.InitResource(d3dDevice);
-
 	D3DCOLOR cellDiffuse = 0xffffffff;
 	CUSTOMVERTEX Vertices[] =
 	{
@@ -29,17 +29,8 @@ bool Cell::Initialize(LPDIRECT3DDEVICE9 d3dDevice)
 		{ mSize.X, mSize.Y, 0.f, cellDiffuse, 1.f, 1.f },
 	};
 
-	VOID* pVertices;
-	LPDIRECT3DVERTEXBUFFER9 vertexBufferToLock = mVBResource.GetVertexBuffer();
-	assert(vertexBufferToLock);
-
-	if (!vertexBufferToLock || FAILED(vertexBufferToLock->Lock(0, sizeof(Vertices), (void**)&pVertices, 0)))
-	{
-		return false;
-	}
-
-	memcpy(pVertices, Vertices, sizeof(Vertices));
-	vertexBufferToLock->Unlock();
+	mVBResource->SetVertexBufferData(sizeof(CUSTOMVERTEX), 4, D3DFVF_CUSTOMVERTEX, Vertices);
+	mVBResource->InitResource(d3dDevice);
 
 	return true;
 }
@@ -51,7 +42,7 @@ void Cell::Deinitialize()
 void Cell::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 {
 	// Set Texture
-	GameResource* d3dResource = ResourceManager::GetInstance()->GetResourceById(mResourceId);
+	ArchivedGameResource* d3dResource = ResourceManager::GetInstance()->GetArchivedGameResource(mResourceName);
 	ImageResource* image = dynamic_cast<ImageResource*>(d3dResource);
 	if(image)
 	{
@@ -60,8 +51,8 @@ void Cell::Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect)
 	}
 
 	// Set VB
-	d3dDevice->SetStreamSource(0, mVBResource.GetVertexBuffer(), 0, mVBResource.GetVertexStride());
-	d3dDevice->SetFVF(mVBResource.GetVertexFormat());
+	d3dDevice->SetStreamSource(0, mVBResource->GetVertexBuffer(), 0, mVBResource->GetVertexStride());
+	d3dDevice->SetFVF(mVBResource->GetVertexFormat());
 
 	// Update matrix
 	D3DXHANDLE wvpMatrixHandle = effect->GetParameterByName(0, "gWorldViewProjectionMatrix");
@@ -95,14 +86,14 @@ void Cell::OnPositionUpdated()
 	D3DXMatrixMultiply(&mWVPMatrix, &matCellWorldTrans, &mParentGrid->GetProjectionMatrix());
 }
 
-void Cell::SetResourceID(int resourceId)
+void Cell::SetResourceName(const wstring& resourceName)
 {
-	mResourceId = resourceId;
+	mResourceName = resourceName;
 }
 
-int Cell::GetResourceID() const
+const wstring& Cell::GetResourceName() const
 {
-	return mResourceId;
+	return mResourceName;
 }
 
 void Cell::SetRow(int row)
@@ -145,11 +136,6 @@ void Cell::SetSwappedCell(Cell* other)
 	mSwappedCell = other;
 }
 
-//Cell* Cell::GetCellBelow() const
-//{
-//	return mCellBelow;
-//}
-
 void Cell::SetCellBelow(Cell* cellBelow)
 {
 	mCellBelow = cellBelow;
@@ -174,10 +160,10 @@ void Cell::Tick(float deltaTime)
 {
 	switch(mCellState)
 	{
-		case CS_Falling:
+		case CellState::Falling:
 			TickFalling(deltaTime);
 			break;
-		case CS_Switching:
+		case CellState::Switching:
 			TickSwitching(deltaTime);
 			break;
 	}
@@ -187,7 +173,7 @@ void Cell::Tick(float deltaTime)
 
 void Cell::TickFalling(float deltaTime)
 {
-	if(mPrevCellState == CS_Idle)
+	if(mPrevCellState == CellState::Idle)
 	{
 		mFallingSpeed = 0.f;
 	}
@@ -207,7 +193,7 @@ void Cell::TickFalling(float deltaTime)
 	{
 		mPosition.Y = mTargetPosition.Y;
 		mFallingSpeed = 0.f;
-		SetCellState(CS_Idle);
+		SetCellState(CellState::Idle);
 	}
 
 	OnPositionUpdated();
@@ -254,11 +240,11 @@ void Cell::TickSwitching(float deltaTime)
 	{
 		if(GetSwappedCell() != nullptr)
 		{
-			SetCellState(CS_PendingCheck);
+			SetCellState(CellState::PendingCheck);
 		}
 		else
 		{
-			SetCellState(CS_Idle);
+			SetCellState(CellState::Idle);
 		}
 	}
 
@@ -267,11 +253,11 @@ void Cell::TickSwitching(float deltaTime)
 
 void Cell::SwapWith(Cell* other, bool isSwapBack)
 {
-	int tempResourceId = this->GetResourceID();
-	this->SetResourceID(other->GetResourceID());
-	other->SetResourceID(tempResourceId);
+	const wstring tempResourceId = this->GetResourceName();
+	this->SetResourceName(other->GetResourceName());
+	other->SetResourceName(tempResourceId);
 
-	Vector2D tempPosition = this->GetPosition();
+	const Vector2D tempPosition = this->GetPosition();
 	this->SetPosition(other->GetPosition());
 	other->SetPosition(tempPosition);
 
@@ -286,6 +272,6 @@ void Cell::SwapWith(Cell* other, bool isSwapBack)
 		other->SetSwappedCell(nullptr);
 	}
 
-	this->SetCellState(CS_Switching);
-	other->SetCellState(CS_Switching);
+	this->SetCellState(CellState::Switching);
+	other->SetCellState(CellState::Switching);
 }

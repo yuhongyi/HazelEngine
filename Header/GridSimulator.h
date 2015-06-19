@@ -1,11 +1,14 @@
 #pragma once
 #include "Grid.h"
+#include "vector"
+#include "string"
+
+using namespace std;
 
 class GridSimulator
 {
 public:
 	GridSimulator();
-	~GridSimulator();
 
 	// Methods
 	bool FindAvailableMove(Vector2D& cell1, Vector2D& cell2);
@@ -14,7 +17,7 @@ public:
 	void GenerateStartGrid();
 	Vector2D GetSize();
 private:
-	int* mSimGrid;
+	vector<wstring> mSimGrid;
 	int mGridWidth;
 	int mGridHeight;
 	

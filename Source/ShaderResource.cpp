@@ -6,14 +6,13 @@
 ShaderResource::ShaderResource() :
 	mEffect(nullptr)
 {
-	mFileSource[0] = '/0';
 }
 
-bool ShaderResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating)
+bool ShaderResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice)
 {
 	if (FAILED(D3DXCreateEffectFromFile(
 		d3dDevice,
-		mFileSource,
+		mFileSource.c_str(),
 		nullptr,
 		nullptr,
 		D3DXFX_NOT_CLONEABLE | D3DXSHADER_NO_PRESHADER | D3DXFX_LARGEADDRESSAWARE,
@@ -24,20 +23,12 @@ bool ShaderResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating
 		return false;
 	}
 
-	return GameResource::InitResource(d3dDevice, isRecreating);
+	return GameResource::InitResource(d3dDevice);
 }
 
-void ShaderResource::ReleaseResource(bool isDeviceLost)
+void ShaderResource::ReleaseResource()
 {
 	SAFE_RELEASE(mEffect);
-}
-
-void ShaderResource::SetSource(LPDIRECT3DDEVICE9 d3dDevice, LPWSTR source)
-{
-	if(wcslen(source) < MAX_PATH)
-	{
-		wcscpy(&mFileSource[0], source);
-	}
 }
 
 ID3DXEffect* ShaderResource::GetEffect()

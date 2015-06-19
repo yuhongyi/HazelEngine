@@ -13,9 +13,9 @@ public:
 	InputManager();
 
 	// IInputReceiver
-	virtual void OnMouseMove(HWND hWnd, WORD mouseX, WORD mouseY, int comboState);
-	virtual void OnMouseLButtonDown(HWND hWnd, WORD mouseX, WORD mouseY, int comboState);
-	virtual void OnMouseLButtonUp(HWND hWnd, WORD mouseX, WORD mouseY, int comboState);
+	virtual void OnMouseMove(HWND hWnd, WORD mouseX, WORD mouseY, int comboState) override;
+	virtual void OnMouseLButtonDown(HWND hWnd, WORD mouseX, WORD mouseY, int comboState) override;
+	virtual void OnMouseLButtonUp(HWND hWnd, WORD mouseX, WORD mouseY, int comboState) override;
 
 	// Methods
 	void RegisterInputReceiver(IInputReceiver* inputReceiver);

@@ -69,7 +69,7 @@ void Render(float fElapsedTime)
 	// Render the scene
 	if (SUCCEEDED(g_pd3dDevice->BeginScene()))
 	{
-		ShaderResource* shader = dynamic_cast<ShaderResource*>(ResourceManager::GetInstance()->GetResourceById(7));
+		ShaderResource* shader = dynamic_cast<ShaderResource*>(ResourceManager::GetInstance()->GetArchivedGameResource(L"Shaders\\BasicHLSL.fx"));
 		if (shader)
 		{
 			ID3DXEffect* shaderEffect = shader->GetEffect();
@@ -112,7 +112,8 @@ void Tick()
 HRESULT InitializeGame()
 {
 	// Initialize Resource
-	if(!ResourceManager::GetInstance()->InitResource(g_pd3dDevice))
+	if(!ResourceManager::GetInstance()->LoadArchivedResource(g_pd3dDevice)
+		|| !ResourceManager::GetInstance()->InitResource(g_pd3dDevice))
 	{
 		return E_FAIL;
 	}
@@ -137,6 +138,9 @@ void CleanUp()
 	ParticleManager::GetInstance()->Deinitialize();
 	ZooKeeperGame::GetInstance()->Deinitialize();
 
+	ResourceManager::GetInstance()->ReleaseResource();
+	ResourceManager::GetInstance()->UnloadArchivedResource();
+
 	InputManager::GetInstance()->Destroy();
 	ResourceManager::GetInstance()->Destroy();
 	ParticleManager::GetInstance()->Destroy();
@@ -148,7 +152,7 @@ void OnDeviceLost()
 	HRESULT hr;
 	assert(g_IsDeviceLost);
 
-	ResourceManager::GetInstance()->ReleaseResource(true);
+	ResourceManager::GetInstance()->ReleaseResource();
 
 	while (g_pd3dDevice->TestCooperativeLevel() != D3DERR_DEVICENOTRESET)
 	{
@@ -172,7 +176,7 @@ void OnDeviceLost()
 	}
 	g_IsDeviceLost = false;
 
-	ResourceManager::GetInstance()->InitResource(g_pd3dDevice, true);
+	ResourceManager::GetInstance()->InitResource(g_pd3dDevice);
 }
 
 

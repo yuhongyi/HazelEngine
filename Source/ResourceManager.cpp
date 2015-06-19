@@ -6,73 +6,70 @@ mImageResourceCount(0)
 {
 }
 
-ResourceManager::~ResourceManager()
+bool ResourceManager::InitResource(LPDIRECT3DDEVICE9 d3dDevice)
 {
-	;
-}
-
-bool ResourceManager::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating)
-{
-	if (isRecreating)
+	for (const auto resource : mResources)
 	{
-		for (auto resourceIter = mResources.cbegin();
-			resourceIter != mResources.cend();
-			++resourceIter)
+		if (!resource->InitResource(d3dDevice))
 		{
-			resourceIter->second->InitResource(d3dDevice, isRecreating);
-		}
-	}
-	else
-	{
-		mNumResource = 0;
-
-		mImageResourceCount = gImageCount;
-		for (int i = 0; i < gImageCount; i++)
-		{
-			ImageResource* image = new ImageResource();
-			image->LoadResource(d3dDevice, gImageList[i]);
-			if (!image->InitResource(d3dDevice))
-			{
-				return false;
-			}
-		}
-
-		for (int i = 0; i < gShaderCount; i++)
-		{
-			ShaderResource* shader = new ShaderResource();
-			shader->SetSource(d3dDevice, gShaderList[i]);
-			if (!shader->InitResource(d3dDevice, isRecreating))
-			{
-				return false;
-			}
+			return false;
 		}
 	}
 
 	return true;
 }
 
-void ResourceManager::ReleaseResource(bool isRecreating)
+bool ResourceManager::LoadArchivedResource(LPDIRECT3DDEVICE9 d3dDevice)
 {
-	for (auto resourceIter = mResources.cbegin();
-		resourceIter != mResources.cend();
-		++resourceIter)
-	{
-		resourceIter->second->ReleaseResource(isRecreating);
+	mNumResource = 0;
 
-		if (!isRecreating)
+	mImageResourceCount = gImageCount;
+	for (int i = 0; i < gImageCount; i++)
+	{
+		ImageResource* image = new ImageResource();
+		if (!image)
 		{
-			delete resourceIter->second;
+			return false;
 		}
+
+		image->LoadResource(d3dDevice, gImageList[i]);
+		mArchivedResources[gImageList[i]] = image;
+	}
+
+	for (int i = 0; i < gShaderCount; i++)
+	{
+		ShaderResource* shader = new ShaderResource();
+		if (!shader)
+		{
+			return false;
+		}
+
+		shader->LoadResource(d3dDevice, gShaderList[i]);
+		mArchivedResources[gShaderList[i]] = shader;
+	}
+
+	return true;
+}
+
+void ResourceManager::UnloadArchivedResource()
+{
+	for (auto resource : mArchivedResources)
+	{
+		delete resource.second;
+	}
+
+	mArchivedResources.empty();
+}
+
+void ResourceManager::ReleaseResource()
+{
+	for (const auto resource : mResources)
+	{
+		resource->ReleaseResource();
 	}
 }
 
-GameResource* ResourceManager::GetResourceById(int id)
+ArchivedGameResource* ResourceManager::GetArchivedGameResource(const wstring& resourceName)
 {
-	map<int, GameResource*>::const_iterator resourceIter = mResources.find(id);
-	if(resourceIter != mResources.cend())
-	{
-		return resourceIter->second;
-	}
-
-	return nullptr;
+	return mArchivedResources.find(resourceName) != mArchivedResources.end() ? mArchivedResources[resourceName] : nullptr;
 }

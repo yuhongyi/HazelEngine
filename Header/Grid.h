@@ -1,12 +1,10 @@
 #pragma once
-#include "Cell.h"
 #include "GameObject.h"
 #include "Interfaces.h"
+#include "Cell.h"
 #include "vector"
 
 using namespace std;
-
-class Cell;
 
 class Grid : public GameObject, public IInputReceiver
 {
@@ -17,15 +15,15 @@ public:
 	virtual ~Grid();
 
 	// GameObject
-	virtual bool Initialize(LPDIRECT3DDEVICE9 d3dDevice);
-	virtual void Deinitialize();
-	virtual void Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect);
-	virtual void Tick(float deltaTime);
+	virtual bool Initialize(LPDIRECT3DDEVICE9 d3dDevice) override;
+	virtual void Deinitialize() override;
+	virtual void Render(LPDIRECT3DDEVICE9 d3dDevice, ID3DXEffect* effect) override;
+	virtual void Tick(float deltaTime) override;
 
 	// IInputReceiver
-	virtual void OnMouseMove(HWND hWnd, WORD mouseX, WORD mouseY, int comboState);
-	virtual void OnMouseLButtonDown(HWND hWnd, WORD mouseX, WORD mouseY, int comboState);
-	virtual void OnMouseLButtonUp(HWND hWnd, WORD mouseX, WORD mouseY, int comboState);
+	virtual void OnMouseMove(HWND hWnd, WORD mouseX, WORD mouseY, int comboState) override;
+	virtual void OnMouseLButtonDown(HWND hWnd, WORD mouseX, WORD mouseY, int comboState) override;
+	virtual void OnMouseLButtonUp(HWND hWnd, WORD mouseX, WORD mouseY, int comboState) override;
 		
 	// methods
 	virtual void Initialize();

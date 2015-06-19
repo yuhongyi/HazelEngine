@@ -61,9 +61,6 @@
     <ClCompile Include="Source\InputManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ZooKeeper.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Cell.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -101,6 +98,15 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\IndexBufferResource.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Particle.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\EngineMain.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ArchivedGameResource.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -163,6 +169,12 @@
       <Filter>Header</Filter>
     </ClInclude>
     <ClInclude Include="Header\IndexBufferResource.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Particle.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\ArchivedGameResource.h">
       <Filter>Header</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,18 +2,17 @@
 #include "Globals.h"
 #include "GameObject.h"
 #include "VertexBufferResource.h"
-#include "Grid.h"
 
 class Grid;
 
-enum CellState
+enum class CellState
 {
-	CS_Idle,
-	CS_InInteraction,
-	CS_Vanish,
-	CS_Falling,
-	CS_Switching,
-	CS_PendingCheck,
+	Idle,
+	InInteraction,
+	Vanish,
+	Falling,
+	Switching,
+	PendingCheck,
 };
 
 class Cell : public GameObject
@@ -31,8 +30,8 @@ public:
 
 	// methods
 	void SetTargetPosition(Vector2D targetPosition);
-	void SetResourceID(int resourceId);
-	int GetResourceID() const;
+	void SetResourceName(const wstring& resourceName);
+	const wstring& GetResourceName() const;
 	void SetRow(int row);
 	int GetRow() const;
 	void SetColumn(int column);
@@ -48,7 +47,7 @@ public:
 	virtual void SwapWith(Cell* other, bool isSwapBack);
 
 private:
-	int mResourceId;
+	wstring mResourceName;
 	CellState mPrevCellState;
 	CellState mCellState;
 	int mRow;
@@ -66,5 +65,5 @@ private:
 	virtual void OnPositionUpdated();
 
 	// Render related
-	VertexBufferResource mVBResource;
+	VertexBufferResource* mVBResource;
 };

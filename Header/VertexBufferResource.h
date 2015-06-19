@@ -1,6 +1,9 @@
 #pragma once
 #include <d3d9.h>
 #include "GameResource.h"
+#include "vector"
+
+using namespace std;
 
 class VertexBufferResource : public GameResource
 {
@@ -9,13 +12,13 @@ public:
 	VertexBufferResource();
 
 	// GameResource
-	virtual bool InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating = false);
-	virtual void ReleaseResource(bool isDeviceLost = false);
+	virtual bool InitResource(LPDIRECT3DDEVICE9 d3dDevice) override;
+	virtual void ReleaseResource() override;
 
 	// Methods
-	void LoadResource(LPDIRECT3DDEVICE9 d3dDevice, LPWSTR source);
+	void LoadResource(LPDIRECT3DDEVICE9 d3dDevice, const wstring& source);
 	inline LPDIRECT3DVERTEXBUFFER9 GetVertexBuffer() { return mVB; }
-	void SetVertexBufferFormat(UINT vertexSize, UINT numVertices, DWORD vertexFormat);
+	void SetVertexBufferData(UINT vertexSize, UINT numVertices, DWORD vertexFormat, void* vertexData);
 	UINT GetVertexStride() { return mVertexSize; }
 	UINT GetNumVertices() { return mNumVertices; }
 	DWORD GetVertexFormat() { return mVertexFormat; }
@@ -25,4 +28,5 @@ private:
 	UINT mVertexSize;
 	UINT mNumVertices;
 	DWORD mVertexFormat;
+	vector<BYTE> mVertexData;
 };

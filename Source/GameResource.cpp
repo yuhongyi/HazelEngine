@@ -2,27 +2,12 @@
 #include "GameResource.h"
 #include "ResourceManager.h"
 
-GameResource::GameResource() :
-mResourceId(-1)
+GameResource::GameResource()
 {
-	;
+	ResourceManager::GetInstance()->AddResource(this);
 }
 
-bool GameResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating)
+bool GameResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice)
 {
-	if(!isRecreating)
-	{
-		ResourceManager::GetInstance()->AddResource(this);
-	}
 	return true;
-}
-
-void GameResource::SetResourceId(int resourceId)
-{
-	mResourceId = resourceId;
-}
-
-int GameResource::GetResourceId()
-{
-	return mResourceId;
 }

@@ -6,10 +6,9 @@
 VertexBufferResource::VertexBufferResource() :
 mVB(nullptr)
 {
-	mFileSource[0] = '/0';
 }
 
-bool VertexBufferResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecreating)
+bool VertexBufferResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice)
 {
 	if (FAILED(d3dDevice->CreateVertexBuffer(mVertexSize * mNumVertices,
 		0, mVertexFormat,
@@ -19,21 +18,35 @@ bool VertexBufferResource::InitResource(LPDIRECT3DDEVICE9 d3dDevice, bool isRecr
 		return false;
 	}
 
-	return GameResource::InitResource(d3dDevice, isRecreating);
+	assert((mVertexSize * mNumVertices) == mVertexData.size());
+
+	VOID* pVertices;
+	if (FAILED(mVB->Lock(0, mVertexSize * mNumVertices, (void**)&pVertices, 0)))
+	{
+		return false;
+	}
+
+	memcpy(pVertices, mVertexData.data(), mVertexSize * mNumVertices);
+	mVB->Unlock();
+
+	return GameResource::InitResource(d3dDevice);
 }
 
-void VertexBufferResource::ReleaseResource(bool isDeviceLost)
+void VertexBufferResource::ReleaseResource()
 {
 	SAFE_RELEASE(mVB);
 }
 
-void VertexBufferResource::LoadResource(LPDIRECT3DDEVICE9 d3dDevice, LPWSTR source)
+void VertexBufferResource::LoadResource(LPDIRECT3DDEVICE9 d3dDevice, const wstring& source)
 {
 }
 
-void VertexBufferResource::SetVertexBufferFormat(UINT vertexSize, UINT numVertices, DWORD vertexFormat)
+void VertexBufferResource::SetVertexBufferData(UINT vertexSize, UINT numVertices, DWORD vertexFormat, void* vertexData)
 {
 	mVertexSize = vertexSize;
 	mNumVertices = numVertices;
 	mVertexFormat = vertexFormat;
+
+	mVertexData.resize(vertexSize * numVertices);
+	memcpy(mVertexData.data(), vertexData, vertexSize * numVertices);
 }

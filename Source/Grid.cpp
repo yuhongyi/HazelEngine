@@ -2,6 +2,7 @@
 
 #include "Globals.h"
 #include "Grid.h"
+#include "Cell.h"
 #include "GridSimulator.h"
 #include "ResourceManager.h"
 #include "InputManager.h"
@@ -99,7 +100,7 @@ bool Grid::Initialize(LPDIRECT3DDEVICE9 d3dDevice)
 		currentCell->SetSize(Vector2D(static_cast<float>(gCellSize), static_cast<float>(gCellSize)));
 		currentCell->SetPosition(Vector2D(static_cast<float>(gCellSize * column), static_cast<float>(gCellSize * row)));
 		currentCell->SetTargetPosition(currentCell->GetPosition());
-		currentCell->SetResourceID(ResourceManager::GetInstance()->GetRandomImageResourceId());
+		currentCell->SetResourceName(gImageList[ResourceManager::GetInstance()->GetRandomImageResourceId()]);
 		currentCell->SetRow(row);
 		currentCell->SetColumn(column);
 
@@ -169,21 +170,21 @@ void Grid::HandleMouseInteraction(WORD mouseX, WORD mouseY, bool pickNewInteract
 	{
 		if(mCellInInteraction
 			&& mCellInInteraction != hitCell
-			&& hitCell->GetCellState() == CS_Idle
+			&& hitCell->GetCellState() == CellState::Idle
 			&& mCellInInteraction->IsAdjacentTo(hitCell))
 		{
 			mCellInInteraction->SwapWith(hitCell, false);
 			mCellInInteraction = nullptr;
 		}
-		else if(hitCell->GetCellState() == CS_Idle)
+		else if(hitCell->GetCellState() == CellState::Idle)
 		{
 			if(mCellInInteraction)
 			{
-				mCellInInteraction->SetCellState(CS_Idle);
+				mCellInInteraction->SetCellState(CellState::Idle);
 			}
 			if(pickNewInteractiveCell)
 			{
-				hitCell->SetCellState(CS_InInteraction);
+				hitCell->SetCellState(CellState::InInteraction);
 				mCellInInteraction = hitCell;
 			}
 		}
@@ -238,9 +239,9 @@ void Grid::Tick(float deltaTime)
 	ProcessVanishedCells();
 
 	// Tick cells
-	for(int i = 0; i < mWidth * mHeight; i++)
+	for(auto cell : mCells)
 	{
-		mCells[i]->Tick(deltaTime);
+		cell->Tick(deltaTime);
 	}
 }
 
@@ -257,7 +258,7 @@ bool Grid::ProcessVanishedCells()
 			Cell* currentCell = GetCell(row, col);
 			if(currentCell)
 			{
-				if(currentCell->GetCellState() == CS_Vanish)
+				if(currentCell->GetCellState() == CellState::Vanish)
 				{
 					vanishedCellCounter++;
 
@@ -272,8 +273,8 @@ bool Grid::ProcessVanishedCells()
 						if(cellToMove)
 						{
 							cellToMove->SetPosition(currentCell->GetPosition());
-							cellToMove->SetCellState(CS_Falling);
-							cellToMove->SetResourceID(currentCell->GetResourceID());
+							cellToMove->SetCellState(CellState::Falling);
+							cellToMove->SetResourceName(currentCell->GetResourceName());
 						}
 					}
 				}
@@ -300,8 +301,8 @@ bool Grid::ProcessVanishedCells()
 				Vector2D newCellPosition = newCell->GetPosition();
 				newCellPosition.Y = lastFallingCellHeight -((vanishedCellCounter - row) * newCell->GetSize().Y);
 				newCell->SetPosition(newCellPosition);
-				newCell->SetCellState(CS_Falling);
-				newCell->SetResourceID(ResourceManager::GetInstance()->GetRandomImageResourceId());
+				newCell->SetCellState(CellState::Falling);
+				newCell->SetResourceName(gImageList[ResourceManager::GetInstance()->GetRandomImageResourceId()]);
 			}
 		}
 
@@ -317,10 +318,10 @@ bool Grid::ProcessVanishedCells()
 bool Grid::HasAnyMovement()
 {
 	// All cells need to be stable
-	for(int i = 0; i < mHeight * mHeight; i++)
+	for(auto cell : mCells)
 	{
-		if(mCells[i]->GetCellState() != CS_Idle
-			&& mCells[i]->GetCellState() != CS_InInteraction)
+		if (cell->GetCellState() != CellState::Idle
+			&& cell->GetCellState() != CellState::InInteraction)
 		{
 			return true;
 		}
@@ -344,9 +345,9 @@ bool Grid::HasAnyMovement()
 
 void Grid::VanishAllCells()
 {
-	for(int i = 0; i < mHeight * mWidth; i++)
+	for(auto cell : mCells)
 	{
-		mCells[i]->SetCellState(CS_Vanish);
+		cell->SetCellState(CellState::Vanish);
 	}
 }
 
@@ -359,7 +360,7 @@ void Grid::ProcessPendingCheckCells()
 		for(int col = 0; col <mWidth; col++)
 		{
 			Cell* currentCell = GetCell(row, col);
-			if(currentCell && currentCell->GetCellState() == CS_PendingCheck)
+			if(currentCell && currentCell->GetCellState() == CellState::PendingCheck)
 			{
 				if(cellVanishTable.find(currentCell) == cellVanishTable.cend())
 				{
@@ -369,7 +370,7 @@ void Grid::ProcessPendingCheckCells()
 				Cell* pairCell = currentCell->GetSwappedCell();
 				if(pairCell && cellVanishTable.find(pairCell) == cellVanishTable.cend())
 				{
-					assert(pairCell->GetCellState() == CS_PendingCheck);
+					assert(pairCell->GetCellState() == CellState::PendingCheck);
 					cellVanishTable[pairCell] = CheckVanishWithCell(pairCell);
 				}
 
@@ -381,14 +382,14 @@ void Grid::ProcessPendingCheckCells()
 				}
 				else
 				{
-					if(currentCell->GetCellState() == CS_PendingCheck)
+					if(currentCell->GetCellState() == CellState::PendingCheck)
 					{
-						currentCell->SetCellState(CS_Idle);
+						currentCell->SetCellState(CellState::Idle);
 					}
 
-					if(pairCell->GetCellState() == CS_PendingCheck)
+					if(pairCell->GetCellState() == CellState::PendingCheck)
 					{
-						pairCell->SetCellState(CS_Idle);
+						pairCell->SetCellState(CellState::Idle);
 					}
 				}
 
@@ -452,10 +453,10 @@ bool Grid::CheckVanishFromCell(Cell* startCell, bool inRow)
 
 			if(!cellsToVanish[i]
 				|| (i > 0
-					&& cellsToVanish[i]->GetResourceID() != cellsToVanish[i - 1]->GetResourceID())
-				|| (cellsToVanish[i]->GetCellState() != CS_Idle
-					&& cellsToVanish[i]->GetCellState() != CS_Vanish
-					&& cellsToVanish[i]->GetCellState() != CS_PendingCheck))
+					&& cellsToVanish[i]->GetResourceName() != cellsToVanish[i - 1]->GetResourceName())
+				|| (cellsToVanish[i]->GetCellState() != CellState::Idle
+					&& cellsToVanish[i]->GetCellState() != CellState::Vanish
+					&& cellsToVanish[i]->GetCellState() != CellState::PendingCheck))
 			{
 				return false;
 			}
@@ -470,10 +471,10 @@ bool Grid::CheckVanishFromCell(Cell* startCell, bool inRow)
 
 			if(!cellsToVanish[i]
 			|| (i > 0
-				&& cellsToVanish[i]->GetResourceID() != cellsToVanish[i - 1]->GetResourceID())
-			|| (cellsToVanish[i]->GetCellState() != CS_Idle
-				&& cellsToVanish[i]->GetCellState() != CS_Vanish
-				&& cellsToVanish[i]->GetCellState() != CS_PendingCheck))
+				&& cellsToVanish[i]->GetResourceName() != cellsToVanish[i - 1]->GetResourceName())
+			|| (cellsToVanish[i]->GetCellState() != CellState::Idle
+				&& cellsToVanish[i]->GetCellState() != CellState::Vanish
+				&& cellsToVanish[i]->GetCellState() != CellState::PendingCheck))
 			{
 				return false;
 			}
@@ -481,9 +482,9 @@ bool Grid::CheckVanishFromCell(Cell* startCell, bool inRow)
 	}
 
 	// Set all cells to Vanish
-	for(int i = 0; i < gMinimumVanishCount; i++)
+	for(auto cell : cellsToVanish)
 	{
-		cellsToVanish[i]->SetCellState(CS_Vanish);
+		cell->SetCellState(CellState::Vanish);
 	}
 
 	return true;

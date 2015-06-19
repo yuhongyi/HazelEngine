@@ -10,11 +10,9 @@ void InputManager::OnMouseMove(HWND hWnd, WORD mouseX, WORD mouseY, int comboSta
 	mMousePosition.X = mouseX;
 	mMousePosition.Y = mouseY;
 
-	for(auto receiverIter = mInputReceivers.cbegin();
-		receiverIter != mInputReceivers.cend();
-		++receiverIter)
+	for(auto receiverIter : mInputReceivers)
 	{
-		(*receiverIter)->OnMouseMove(hWnd, mouseX, mouseY, comboState);
+		receiverIter->OnMouseMove(hWnd, mouseX, mouseY, comboState);
 	}
 }
 
@@ -22,11 +20,9 @@ void InputManager::OnMouseLButtonDown(HWND hWnd, WORD mouseX, WORD mouseY, int c
 {
 	mIsMouseLeftButtonDown = true;
 
-	for(auto receiverIter = mInputReceivers.cbegin();
-		receiverIter != mInputReceivers.cend();
-		++receiverIter)
+	for(auto receiverIter : mInputReceivers)
 	{
-		(*receiverIter)->OnMouseLButtonDown(hWnd, mouseX, mouseY, comboState);
+		receiverIter->OnMouseLButtonDown(hWnd, mouseX, mouseY, comboState);
 	}
 }
 
@@ -34,11 +30,9 @@ void InputManager::OnMouseLButtonUp(HWND hWnd, WORD mouseX, WORD mouseY, int com
 {
 	mIsMouseLeftButtonDown = false;
 
-	for(auto receiverIter = mInputReceivers.cbegin();
-		receiverIter != mInputReceivers.cend();
-		++receiverIter)
+	for(auto receiverIter : mInputReceivers)
 	{
-		(*receiverIter)->OnMouseLButtonUp(hWnd, mouseX, mouseY, comboState);
+		receiverIter->OnMouseLButtonUp(hWnd, mouseX, mouseY, comboState);
 	}
 }
 

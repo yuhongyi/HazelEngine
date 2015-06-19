@@ -3,15 +3,9 @@
 #include "GameConfig.h"
 
 GridSimulator::GridSimulator() :
-	mSimGrid(nullptr),
 	mGridWidth(0),
 	mGridHeight(0)
 {
-}
-
-GridSimulator::~GridSimulator()
-{
-	SAFE_DELETE_ARRAY(mSimGrid);
 }
 
 void GridSimulator::ImportGrid(Grid* grid)
@@ -26,7 +20,7 @@ void GridSimulator::ImportGrid(Grid* grid)
 		{
 			for(int col = 0; col < mGridWidth; col++)
 			{
-				mSimGrid[row * mGridWidth + col] = grid->GetCell(row, col)->GetResourceID();
+				mSimGrid[row * mGridWidth + col] = grid->GetCell(row, col)->GetResourceName();
 			}
 		}
 	}
@@ -40,7 +34,7 @@ void GridSimulator::ExportGrid(Grid* grid)
 		{
 			for(int col = 0; col < mGridWidth; col++)
 			{
-				grid->GetCell(row, col)->SetResourceID(mSimGrid[row * mGridWidth + col]);
+				grid->GetCell(row, col)->SetResourceName(mSimGrid[row * mGridWidth + col]);
 			}
 		}
 	}
@@ -221,6 +215,6 @@ void GridSimulator::ResizeGrid(int newWidth, int newHeight)
 
 	mGridWidth = newWidth;
 	mGridHeight = newHeight;
-	SAFE_DELETE_ARRAY(mSimGrid);
-	mSimGrid = new int[newWidth * newHeight];
+
+	mSimGrid.resize(newWidth * newHeight);
 }
